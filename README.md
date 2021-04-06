@@ -85,6 +85,13 @@ A precedencia é feita como segue abaixo:
 ```
 >> (((a / b) + (a * b)) - 1)
 ```
+Passo a passo:
+```
+>> (a/b) # divisao
+>> (a*b) # produto
+>> (a/b + a*b) # soma
+>> ((a/b + a*b) - 1) # subtração
+```
 
 ### Exemplo
 ```
