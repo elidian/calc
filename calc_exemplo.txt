@@ -1,0 +1,10 @@
+in
+
+texto num, nonum = "ola"
+>> & num
+num <<
+>> &num
+num = &nonum
+>> & num
+
+ni
