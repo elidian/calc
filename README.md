@@ -92,7 +92,7 @@ in
 
   real b, h, area
 
-  >> "Cálculo da área do retângulo"
+  >> "Calculo da area do retangulo"
   >> "" # pular linha
 
   >> "Digite a base: "
@@ -102,9 +102,8 @@ in
   h <<
 
   >> ""
-  >> "A área do retângulo é: "
   area = h * b
-  >> area
+  >> "A area do retangulo eh: ", area
 
 ni
 ```
