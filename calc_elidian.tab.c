@@ -153,8 +153,8 @@
         return true;
     }
 
-	VARS *rvar;
-    VARTS *tvar;
+	VARS *rvar = NULL;
+    VARTS *tvar = NULL;
 
 #line 160 "calc_elidian.tab.c"
 
@@ -688,7 +688,7 @@ static const yytype_int16 yyrline[] =
      319,   323,   327,   331,   333,   337,   341,   345,   347,   351,
      353,   354,   356,   357,   376,   377,   378,   379,   380,   381,
      383,   385,   386,   389,   395,   396,   397,   398,   413,   415,
-     416,   418
+     417,   419
 };
 #endif
 
@@ -1353,6 +1353,18 @@ yyreduce:
 #line 1354 "calc_elidian.tab.c"
     break;
 
+  case 3: /* cod: cod exp  */
+#line 133 "calc_elidian.y"
+             {}
+#line 1360 "calc_elidian.tab.c"
+    break;
+
+  case 4: /* cod: %empty  */
+#line 134 "calc_elidian.y"
+      {}
+#line 1366 "calc_elidian.tab.c"
+    break;
+
   case 5: /* exp: VAR '=' arit  */
 #line 136 "calc_elidian.y"
                   {
@@ -1364,7 +1376,7 @@ yyreduce:
             aux->value = (yyvsp[0].real);
         }
     }
-#line 1368 "calc_elidian.tab.c"
+#line 1380 "calc_elidian.tab.c"
     break;
 
   case 6: /* exp: VAR '=' TEXTO  */
@@ -1378,7 +1390,7 @@ yyreduce:
             gets(aux->value);
         }
     }
-#line 1382 "calc_elidian.tab.c"
+#line 1394 "calc_elidian.tab.c"
     break;
 
   case 7: /* exp: VAR '=' OPV VAR  */
@@ -1403,19 +1415,19 @@ yyreduce:
             }
         }
     }
-#line 1407 "calc_elidian.tab.c"
+#line 1419 "calc_elidian.tab.c"
     break;
 
   case 8: /* exp: TIPO_REAL var  */
 #line 174 "calc_elidian.y"
                     {printf("tipo real: %s %s\n", (yyvsp[-1].texto), (yyvsp[0].texto)); }
-#line 1413 "calc_elidian.tab.c"
+#line 1425 "calc_elidian.tab.c"
     break;
 
   case 9: /* exp: TIPO_TEXTO vart  */
 #line 175 "calc_elidian.y"
                       {printf("tipo texto: %s %s\n", (yyvsp[-1].texto), (yyvsp[0].texto)); }
-#line 1419 "calc_elidian.tab.c"
+#line 1431 "calc_elidian.tab.c"
     break;
 
   case 10: /* exp: VAR ENTRADA  */
@@ -1454,31 +1466,31 @@ yyreduce:
             aux->value = atof(test);
         }
     }
-#line 1458 "calc_elidian.tab.c"
+#line 1470 "calc_elidian.tab.c"
     break;
 
   case 11: /* exp: ':' arit  */
 #line 210 "calc_elidian.y"
                {printf("RESULTADO ARITMETICO: %f\n", (yyvsp[0].real)); }
-#line 1464 "calc_elidian.tab.c"
+#line 1476 "calc_elidian.tab.c"
     break;
 
   case 12: /* exp: ':' logica  */
 #line 211 "calc_elidian.y"
                  { if ((yyvsp[0].real) != 0) printf("RESULTADO LOGICA: TRUE\n"); else printf("RESULTADO LOGICA: FALSE\n"); }
-#line 1470 "calc_elidian.tab.c"
+#line 1482 "calc_elidian.tab.c"
     break;
 
   case 13: /* exp: IF if  */
 #line 212 "calc_elidian.y"
             {}
-#line 1476 "calc_elidian.tab.c"
+#line 1488 "calc_elidian.tab.c"
     break;
 
   case 14: /* exp: FOR for  */
 #line 213 "calc_elidian.y"
               {}
-#line 1482 "calc_elidian.tab.c"
+#line 1494 "calc_elidian.tab.c"
     break;
 
   case 15: /* exp: COMENTARIO  */
@@ -1486,25 +1498,25 @@ yyreduce:
                  {
         printf("COMENTARIO: %s\n", (yyvsp[0].texto));
     }
-#line 1490 "calc_elidian.tab.c"
+#line 1502 "calc_elidian.tab.c"
     break;
 
   case 16: /* exp: SAIDA saida  */
 #line 217 "calc_elidian.y"
                   {printf("%s\n", (yyvsp[0].texto)); }
-#line 1496 "calc_elidian.tab.c"
+#line 1508 "calc_elidian.tab.c"
     break;
 
   case 17: /* vart: vart ',' vart1  */
 #line 219 "calc_elidian.y"
                      {sprintf((yyval.texto), "%s, %s", (yyvsp[-2].texto), (yyvsp[0].texto)); }
-#line 1502 "calc_elidian.tab.c"
+#line 1514 "calc_elidian.tab.c"
     break;
 
   case 18: /* vart: vart1  */
 #line 220 "calc_elidian.y"
             {sprintf((yyval.texto), "%s", (yyvsp[0].texto)); }
-#line 1508 "calc_elidian.tab.c"
+#line 1520 "calc_elidian.tab.c"
     break;
 
   case 19: /* vart1: VAR  */
@@ -1518,7 +1530,7 @@ yyreduce:
         else
             printf ("A variável '%s' já existe.\n", (yyvsp[0].texto));
     }
-#line 1522 "calc_elidian.tab.c"
+#line 1534 "calc_elidian.tab.c"
     break;
 
   case 20: /* vart1: VAR '=' TEXTO  */
@@ -1539,7 +1551,7 @@ yyreduce:
         else
             printf ("A variavel '%s' ja existe.\n", (yyvsp[-2].texto));
     }
-#line 1543 "calc_elidian.tab.c"
+#line 1555 "calc_elidian.tab.c"
     break;
 
   case 21: /* vart1: VAR '=' OPV VAR  */
@@ -1570,19 +1582,19 @@ yyreduce:
         else
             printf ("A variavel '%s' ja existe.\n", (yyvsp[-3].texto));
     }
-#line 1574 "calc_elidian.tab.c"
+#line 1586 "calc_elidian.tab.c"
     break;
 
   case 22: /* var: var ',' var1  */
 #line 274 "calc_elidian.y"
                   {sprintf((yyval.texto), "%s, %s", (yyvsp[-2].texto), (yyvsp[0].texto)); }
-#line 1580 "calc_elidian.tab.c"
+#line 1592 "calc_elidian.tab.c"
     break;
 
   case 23: /* var: var1  */
 #line 275 "calc_elidian.y"
            {sprintf((yyval.texto), "%s", (yyvsp[0].texto)); }
-#line 1586 "calc_elidian.tab.c"
+#line 1598 "calc_elidian.tab.c"
     break;
 
   case 24: /* var1: VAR  */
@@ -1596,7 +1608,7 @@ yyreduce:
         else
             printf ("A variável '%s' já existe.\n", (yyvsp[0].texto));
     }
-#line 1600 "calc_elidian.tab.c"
+#line 1612 "calc_elidian.tab.c"
     break;
 
   case 25: /* var1: VAR '=' arit  */
@@ -1617,7 +1629,7 @@ yyreduce:
         else
             printf ("A variavel '%s' ja existe.\n", (yyvsp[-2].texto));
     }
-#line 1621 "calc_elidian.tab.c"
+#line 1633 "calc_elidian.tab.c"
     break;
 
   case 26: /* arit: SIN '(' arit ')'  */
@@ -1626,7 +1638,7 @@ yyreduce:
                 (yyval.real) = sin((yyvsp[-1].real));
                 printf("SIN: %f = %f\n", (yyvsp[-1].real), (yyval.real));
     }
-#line 1630 "calc_elidian.tab.c"
+#line 1642 "calc_elidian.tab.c"
     break;
 
   case 27: /* arit: COS '(' arit ')'  */
@@ -1635,7 +1647,7 @@ yyreduce:
                 (yyval.real) = cos((yyvsp[-1].real));
                 printf("COS: %f = %f\n", (yyvsp[-1].real), (yyval.real));
     }
-#line 1639 "calc_elidian.tab.c"
+#line 1651 "calc_elidian.tab.c"
     break;
 
   case 28: /* arit: RAIZ '(' arit ')'  */
@@ -1644,7 +1656,7 @@ yyreduce:
                 (yyval.real) = sqrt((yyvsp[-1].real));
                 printf("RAIZ: %f = %f\n", (yyvsp[-1].real), (yyval.real));
     }
-#line 1648 "calc_elidian.tab.c"
+#line 1660 "calc_elidian.tab.c"
     break;
 
   case 29: /* arit: '-' arit  */
@@ -1653,7 +1665,7 @@ yyreduce:
                 (yyval.real) = -(yyvsp[0].real);
                 printf("NEG: -%f = -%f\n", (yyvsp[0].real), (yyval.real));
     }
-#line 1657 "calc_elidian.tab.c"
+#line 1669 "calc_elidian.tab.c"
     break;
 
   case 30: /* arit: '|' arit '|'  */
@@ -1662,7 +1674,7 @@ yyreduce:
                 (yyval.real) = fabs((yyvsp[-1].real));
                 printf("MODULO: |%f| = %f\n", (yyvsp[-1].real), (yyval.real));
     }
-#line 1666 "calc_elidian.tab.c"
+#line 1678 "calc_elidian.tab.c"
     break;
 
   case 31: /* arit: arit '+' arit1  */
@@ -1671,7 +1683,7 @@ yyreduce:
                 (yyval.real) = (yyvsp[-2].real) + (yyvsp[0].real);
                 printf("SOMA: %f + %f = %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
     }
-#line 1675 "calc_elidian.tab.c"
+#line 1687 "calc_elidian.tab.c"
     break;
 
   case 32: /* arit: arit '-' arit1  */
@@ -1680,7 +1692,7 @@ yyreduce:
                 (yyval.real) = (yyvsp[-2].real) - (yyvsp[0].real);
                 printf("SUB: %f - %f = %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
     }
-#line 1684 "calc_elidian.tab.c"
+#line 1696 "calc_elidian.tab.c"
     break;
 
   case 34: /* arit1: arit1 '*' arit2  */
@@ -1689,7 +1701,7 @@ yyreduce:
                 (yyval.real) = (yyvsp[-2].real) * (yyvsp[0].real);
                 printf("PROD: %f * %f = %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
     }
-#line 1693 "calc_elidian.tab.c"
+#line 1705 "calc_elidian.tab.c"
     break;
 
   case 35: /* arit1: arit1 '/' arit2  */
@@ -1698,7 +1710,7 @@ yyreduce:
                 (yyval.real) = (yyvsp[-2].real) / (yyvsp[0].real);
                 printf("DIV: %f / %f = %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
     }
-#line 1702 "calc_elidian.tab.c"
+#line 1714 "calc_elidian.tab.c"
     break;
 
   case 36: /* arit1: arit1 REST arit2  */
@@ -1707,7 +1719,7 @@ yyreduce:
                 (yyval.real) = remainder((yyvsp[-2].real), (yyvsp[0].real));
                 printf("RESTO: %f / %f resto %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
     }
-#line 1711 "calc_elidian.tab.c"
+#line 1723 "calc_elidian.tab.c"
     break;
 
   case 38: /* arit2: arit3 '^' arit2  */
@@ -1716,25 +1728,25 @@ yyreduce:
                 (yyval.real) = pow((yyvsp[-2].real), (yyvsp[0].real));
                 printf("EXPO: %f ^ %f = %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
     }
-#line 1720 "calc_elidian.tab.c"
+#line 1732 "calc_elidian.tab.c"
     break;
 
   case 40: /* arit3: '(' arit ')'  */
 #line 353 "calc_elidian.y"
                     {}
-#line 1726 "calc_elidian.tab.c"
+#line 1738 "calc_elidian.tab.c"
     break;
 
   case 41: /* arit3: valor  */
 #line 354 "calc_elidian.y"
             {(yyval.real) = (yyvsp[0].real); }
-#line 1732 "calc_elidian.tab.c"
+#line 1744 "calc_elidian.tab.c"
     break;
 
   case 42: /* valor: REAL  */
 #line 356 "calc_elidian.y"
             { (yyval.real) = (yyvsp[0].real); /*printf("%f ", $$);*/}
-#line 1738 "calc_elidian.tab.c"
+#line 1750 "calc_elidian.tab.c"
     break;
 
   case 43: /* valor: VAR  */
@@ -1757,61 +1769,61 @@ yyreduce:
             //printf("VAR->value = %f\n", $$);
         }
     }
-#line 1761 "calc_elidian.tab.c"
+#line 1773 "calc_elidian.tab.c"
     break;
 
   case 44: /* logica: L1 MAIOR L2  */
 #line 376 "calc_elidian.y"
                     {if ((yyvsp[-2].real) > (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1767 "calc_elidian.tab.c"
+#line 1779 "calc_elidian.tab.c"
     break;
 
   case 45: /* logica: L1 MENOR L2  */
 #line 377 "calc_elidian.y"
                   {if ((yyvsp[-2].real) < (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1773 "calc_elidian.tab.c"
+#line 1785 "calc_elidian.tab.c"
     break;
 
   case 46: /* logica: L1 MAI L2  */
 #line 378 "calc_elidian.y"
                 {if ((yyvsp[-2].real) >= (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1779 "calc_elidian.tab.c"
+#line 1791 "calc_elidian.tab.c"
     break;
 
   case 47: /* logica: L1 MEI L2  */
 #line 379 "calc_elidian.y"
                 {if ((yyvsp[-2].real) <= (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1785 "calc_elidian.tab.c"
+#line 1797 "calc_elidian.tab.c"
     break;
 
   case 48: /* logica: L1 II L2  */
 #line 380 "calc_elidian.y"
                {if ((yyvsp[-2].real) == (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1791 "calc_elidian.tab.c"
+#line 1803 "calc_elidian.tab.c"
     break;
 
   case 49: /* logica: L1 DIF L2  */
 #line 381 "calc_elidian.y"
                 {if ((yyvsp[-2].real) != (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1797 "calc_elidian.tab.c"
+#line 1809 "calc_elidian.tab.c"
     break;
 
   case 50: /* L1: L2  */
 #line 383 "calc_elidian.y"
        {(yyval.real)=(yyvsp[0].real); }
-#line 1803 "calc_elidian.tab.c"
+#line 1815 "calc_elidian.tab.c"
     break;
 
   case 51: /* L2: '(' logica ')'  */
 #line 385 "calc_elidian.y"
                    {(yyval.real)=(yyvsp[-1].real); }
-#line 1809 "calc_elidian.tab.c"
+#line 1821 "calc_elidian.tab.c"
     break;
 
   case 52: /* L2: arit  */
 #line 386 "calc_elidian.y"
            {(yyval.real)=(yyvsp[0].real); }
-#line 1815 "calc_elidian.tab.c"
+#line 1827 "calc_elidian.tab.c"
     break;
 
   case 53: /* saida: TEXTO  */
@@ -1822,25 +1834,25 @@ yyreduce:
         else
             sprintf((yyval.texto), "%s", (yyvsp[0].texto));
     }
-#line 1826 "calc_elidian.tab.c"
+#line 1838 "calc_elidian.tab.c"
     break;
 
   case 54: /* saida: TEXTO ',' saida  */
 #line 395 "calc_elidian.y"
                       {sprintf((yyval.texto), "%s %s", (yyvsp[-2].texto), (yyvsp[0].texto)); }
-#line 1832 "calc_elidian.tab.c"
+#line 1844 "calc_elidian.tab.c"
     break;
 
   case 55: /* saida: arit  */
 #line 396 "calc_elidian.y"
            {sprintf((yyval.texto), "%f", (yyvsp[0].real)); }
-#line 1838 "calc_elidian.tab.c"
+#line 1850 "calc_elidian.tab.c"
     break;
 
   case 56: /* saida: arit ',' saida  */
 #line 397 "calc_elidian.y"
                      {sprintf((yyval.texto), "%f %s", (yyvsp[-2].real), (yyvsp[0].texto)); }
-#line 1844 "calc_elidian.tab.c"
+#line 1856 "calc_elidian.tab.c"
     break;
 
   case 57: /* saida: OPV VAR  */
@@ -1860,35 +1872,36 @@ yyreduce:
             //printf("VAR->value = %f\n", $$);
         }
     }
-#line 1864 "calc_elidian.tab.c"
+#line 1876 "calc_elidian.tab.c"
     break;
 
   case 58: /* saida: OPV VAR ',' saida  */
 #line 413 "calc_elidian.y"
                         {sprintf((yyval.texto), "%s, %s", (yyvsp[-2].texto), (yyvsp[0].texto)); }
-#line 1870 "calc_elidian.tab.c"
+#line 1882 "calc_elidian.tab.c"
     break;
 
   case 59: /* if: logica ':' cod ELSE cod ';'  */
 #line 415 "calc_elidian.y"
-                                {printf("IF ELSE CLOSE\n"); }
-#line 1876 "calc_elidian.tab.c"
+                                {
+    }
+#line 1889 "calc_elidian.tab.c"
     break;
 
   case 60: /* if: logica ':' cod ';'  */
-#line 416 "calc_elidian.y"
+#line 417 "calc_elidian.y"
                          {printf("IF CLOSE\n"); }
-#line 1882 "calc_elidian.tab.c"
+#line 1895 "calc_elidian.tab.c"
     break;
 
   case 61: /* for: arit ':' cod ';'  */
-#line 418 "calc_elidian.y"
+#line 419 "calc_elidian.y"
                       {printf("FOR CLOSE\n"); }
-#line 1888 "calc_elidian.tab.c"
+#line 1901 "calc_elidian.tab.c"
     break;
 
 
-#line 1892 "calc_elidian.tab.c"
+#line 1905 "calc_elidian.tab.c"
 
       default: break;
     }
@@ -2082,15 +2095,12 @@ yyreturn:
   return yyresult;
 }
 
-#line 420 "calc_elidian.y"
+#line 421 "calc_elidian.y"
 
 
 #include "lex.yy.c"
 
 int main(){
-
-    rvar = NULL;
-    tvar = NULL;
     
     yyin=fopen("calc_exemplo.txt", "r");
 

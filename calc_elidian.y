@@ -83,8 +83,8 @@
         return true;
     }
 
-	VARS *rvar;
-    VARTS *tvar;
+	VARS *rvar = NULL;
+    VARTS *tvar = NULL;
 %}
 
 %union{
@@ -113,7 +113,7 @@
 %token MAIOR MENOR MEI MAI II DIF
 
 //DECLARAÇÃO DE TIPO DE NÃO-TERMINAIS
-%type <texto> saida var var1 vart vart1
+%type <texto> saida var var1 vart vart1 cod
 %type <real> exp arit valor logica if arit1 arit2 arit3 L1 L2
 
 //DECLARAÇÃO DE PRECEDÊNCIA
@@ -130,8 +130,8 @@
 
 prog: INICIO cod FINAL {;printf("PROGRAMA FINALIZADO\n");}
     ;
-cod: cod exp 
-    |
+cod: cod exp {}
+    | {}
     ;
 exp: VAR '=' arit {
         //atribuição de variavel REAL
@@ -412,7 +412,8 @@ saida: TEXTO {
     }
     | OPV VAR ',' saida {sprintf($$, "%s, %s", $2, $4); }
     ;
-if: logica ':' cod ELSE cod ';' {printf("IF ELSE CLOSE\n"); }
+if: logica ':' cod ELSE cod ';' {
+    }
     | logica ':' cod ';' {printf("IF CLOSE\n"); };
     ;
 for: arit ':' cod ';' {printf("FOR CLOSE\n"); };
@@ -422,9 +423,6 @@ for: arit ':' cod ';' {printf("FOR CLOSE\n"); };
 #include "lex.yy.c"
 
 int main(){
-
-    rvar = NULL;
-    tvar = NULL;
     
     yyin=fopen("calc_exemplo.txt", "r");
 
