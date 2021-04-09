@@ -959,34 +959,38 @@ case 20:
 YY_RULE_SETUP
 #line 120 "calc_elidian.l"
 {
+    for(int x=0; x<strlen(yytext); x++){
+        yytext[x] = yytext[x+1];
+    }
+    yytext[strlen(yytext)-1] = '\0';
     strcpy(yylval.texto, yytext);
     return TEXTO;
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 124 "calc_elidian.l"
+#line 128 "calc_elidian.l"
 {
     return IF;
 }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 127 "calc_elidian.l"
+#line 131 "calc_elidian.l"
 {
     return ELSE;
 }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 130 "calc_elidian.l"
+#line 134 "calc_elidian.l"
 {
     return FOR;
 }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 133 "calc_elidian.l"
+#line 137 "calc_elidian.l"
 {
     strcpy(yylval.texto, yytext);
     return VAR;
@@ -994,7 +998,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 137 "calc_elidian.l"
+#line 141 "calc_elidian.l"
 {
     strcpy(yylval.texto, yytext);
     return COMENTARIO;
@@ -1002,7 +1006,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 141 "calc_elidian.l"
+#line 145 "calc_elidian.l"
 {
     return yytext[0];
 }
@@ -1010,7 +1014,7 @@ YY_RULE_SETUP
 case 27:
 /* rule 27 can match eol */
 YY_RULE_SETUP
-#line 144 "calc_elidian.l"
+#line 148 "calc_elidian.l"
 {
     /* CONTADOR PARA SALTO DE LINHAS */
     yylineno++;
@@ -1018,24 +1022,24 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 148 "calc_elidian.l"
+#line 152 "calc_elidian.l"
 {
   /* ignore */
 }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 151 "calc_elidian.l"
+#line 155 "calc_elidian.l"
 {
   /* ignore */
 }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 155 "calc_elidian.l"
+#line 159 "calc_elidian.l"
 ECHO;
 	YY_BREAK
-#line 1038 "lex.yy.c"
+#line 1042 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2052,6 +2056,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 155 "calc_elidian.l"
+#line 159 "calc_elidian.l"
 
 

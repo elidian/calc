@@ -118,6 +118,10 @@ INVALIDO .
     return REAL;
 }
 {TEXTO} {
+    for(int x=0; x<strlen(yytext); x++){
+        yytext[x] = yytext[x+1];
+    }
+    yytext[strlen(yytext)-1] = '\0';
     strcpy(yylval.texto, yytext);
     return TEXTO;
 }

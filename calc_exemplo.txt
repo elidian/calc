@@ -1,10 +1,23 @@
 in
 
-texto num, nonum = "ola"
->> & num
-num <<
->> &num
-num = &nonum
->> & num
+texto author = "Elidian Alencar"
+
+  real b, h, area
+
+  >> "Calculo da area do retangulo"
+  >> "" # pular linha
+
+  >> "Digite a base: "
+  b <<
+
+  >> "Digite a altura: "
+  h <<
+
+  >> ""
+  area = h * b
+  >> "A area do retangulo eh: ", area
+
+>> ""
+>> "Author:", &author
 
 ni

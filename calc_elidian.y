@@ -5,7 +5,7 @@
     #include <string.h>
     #include <math.h>
     #include <ctype.h>
-    #include<stdbool.h>
+    #include <stdbool.h>
 
     extern int yylineno;
     int yylex();
@@ -89,7 +89,6 @@
 
 %union{
     char texto[50];
-    int inteiro;
     double real;
 }
 
@@ -215,7 +214,7 @@ exp: VAR '=' arit {
     | COMENTARIO {
         printf("COMENTARIO: %s\n", $1);
     }
-    | SAIDA saida {printf("SAIDA: %s\n", $2); }
+    | SAIDA saida {printf("%s\n", $2); }
     ;
 vart: vart ',' vart1 {sprintf($$, "%s, %s", $1, $3); }
     | vart1 {sprintf($$, "%s", $1); }
@@ -387,10 +386,15 @@ L2: '(' logica ')' {$$=$2; }
     | arit {$$=$1; }
     ;
 
-saida: TEXTO {sprintf($$, "%s", $1); } 
-    | TEXTO ',' saida {sprintf($$, "%s, %s", $1, $3); }
+saida: TEXTO {
+        if(strcmp($1, "")==0)
+            sprintf($$, "");
+        else
+            sprintf($$, "%s", $1);
+    } 
+    | TEXTO ',' saida {sprintf($$, "%s %s", $1, $3); }
     | arit {sprintf($$, "%f", $1); } 
-    | arit ',' saida {sprintf($$, "%f, %s", $1, $3); }
+    | arit ',' saida {sprintf($$, "%f %s", $1, $3); }
     | OPV VAR {
         VARTS * aux = srcht(tvar, $2);
         if (aux == NULL){
