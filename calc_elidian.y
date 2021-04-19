@@ -11,9 +11,18 @@
     int yylex();
     void yyerror(char *s){ printf("\nERROR (%s) na linha %d\n", s, yylineno); }
 
+    typedef struct variavels {
+		char name[50];
+        int type; // string se 0, int se 1, double se 2
+        char tvalue[100];
+        int ivalue;
+        double rvalue;
+		struct variavels * prox;
+	} VARIAVELS;
+
     typedef struct vars {
 		char name[50];
-		float value;
+        double value;
 		struct vars * prox;
 	} VARS;
 
@@ -83,18 +92,21 @@
         return true;
     }
 
-	VARS *rvar = NULL;
-    VARTS *tvar = NULL;
+	VARS *rvar;
+    VARTS *tvar;
 %}
 
 %union{
     char texto[50];
+    int inteiro;
     double real;
 }
 
 //DECLARAÇÃO DE TOKENS
+%token <texto> TIPO
 %token <texto> TIPO_REAL
 %token <texto> TIPO_TEXTO
+%token <inteiro> INTEIRO
 %token <real> REAL
 %token <texto> TEXTO
 %token ENTRADA
@@ -113,7 +125,7 @@
 %token MAIOR MENOR MEI MAI II DIF
 
 //DECLARAÇÃO DE TIPO DE NÃO-TERMINAIS
-%type <texto> saida var var1 vart vart1 cod
+%type <texto> saida var var1 vart vart1
 %type <real> exp arit valor logica if arit1 arit2 arit3 L1 L2
 
 //DECLARAÇÃO DE PRECEDÊNCIA
@@ -130,8 +142,8 @@
 
 prog: INICIO cod FINAL {;printf("PROGRAMA FINALIZADO\n");}
     ;
-cod: cod exp {}
-    | {}
+cod: cod exp 
+    |
     ;
 exp: VAR '=' arit {
         //atribuição de variavel REAL
@@ -171,6 +183,7 @@ exp: VAR '=' arit {
             }
         }
     }
+    | TIPO var {printf("tipo: %s %s\n", $1, $2); }
     | TIPO_REAL var {printf("tipo real: %s %s\n", $1, $2); }
     | TIPO_TEXTO vart {printf("tipo texto: %s %s\n", $1, $2); }
     | VAR ENTRADA {
@@ -353,7 +366,8 @@ arit2: arit3 '^' arit2 {
 arit3: '(' arit ')' {}
     | valor {$$ = $1; }
     ;
-valor: REAL { $$ = $1; /*printf("%f ", $$);*/}
+valor: INTEIRO { $$ = $1;}
+    | REAL { $$ = $1;}
     | VAR {
         VARS * aux = srch(rvar, $1);
         if (aux == NULL){
@@ -412,8 +426,7 @@ saida: TEXTO {
     }
     | OPV VAR ',' saida {sprintf($$, "%s, %s", $2, $4); }
     ;
-if: logica ':' cod ELSE cod ';' {
-    }
+if: logica ':' cod ELSE cod ';' {printf("IF ELSE CLOSE\n"); }
     | logica ':' cod ';' {printf("IF CLOSE\n"); };
     ;
 for: arit ':' cod ';' {printf("FOR CLOSE\n"); };
@@ -423,11 +436,12 @@ for: arit ':' cod ';' {printf("FOR CLOSE\n"); };
 #include "lex.yy.c"
 
 int main(){
+
+    rvar = NULL;
+    tvar = NULL;
     
     yyin=fopen("calc_exemplo.txt", "r");
-
-    do {yyparse();}
-    while (!feof(yyin));
+    yyparse();
     
     fclose(yyin);
 

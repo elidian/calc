@@ -8,21 +8,16 @@ NUMERO [0-9]
 LETRA [a-zA-Z]
 
 /* TIPOS PRIMITIVOS */
-INTEIRO {NUMERO}*
+INTEIRO {NUMERO}+
 REAL {NUMERO}*"."{NUMERO}+
 TEXTO \".*\"
 
 /* TIPOS DE VARIAVEIS */
-TIPO "iinteiro"|"rreal"|"ttexto"
-TIPO_REAL "real"
-TIPO_TEXTO "texto"
+TIPO "inteiro"|"real"|"texto"
 
 /* TOKENS DE ENTRADA E SAIDA DE INFORMAÇÕES */
 ENTRADA "<<"
 SAIDA ">>"
-
-/* OPÇÃO CARACTERISTICA PARA VARIAVEL TIPO TEXTO */
-OPV "&"
 
 /* TOKENS DE INICIO E FIM DE PROGRAMA */
 INICIO "in"
@@ -64,12 +59,6 @@ INVALIDO .
     strcpy(yylval.texto, yytext);
     return TIPO;
 }
-{TIPO_REAL} {
-    return TIPO_REAL;
-}
-{TIPO_TEXTO} {
-    return TIPO_TEXTO;
-}
 "+"|"-"|"/"|"*"|"^" {
   return *yytext;
 }
@@ -109,9 +98,6 @@ INVALIDO .
 {SAIDA} {
     return SAIDA;
 }
-{OPV} {
-    return OPV;
-}
 {INICIO} {
     return INICIO;
 }
@@ -127,11 +113,8 @@ INVALIDO .
     return REAL;
 }
 {TEXTO} {
-    for(int x=0; x<strlen(yytext); x++){
-        yytext[x] = yytext[x+1];
-    }
-    yytext[strlen(yytext)-1] = '\0';
-    strcpy(yylval.texto, yytext);
+    strncpy(yylval.texto, &yytext[1], strlen(yytext)-2);
+    yylval.texto[strlen(yytext)-2] = '\0';
     return TEXTO;
 }
 {IF} {

@@ -80,48 +80,211 @@
     extern int yylineno;
     int yylex();
     void yyerror(char *s){ printf("\nERROR (%s) na linha %d\n", s, yylineno); }
+    #define MAX(a,b) (((a)>(b))?(a):(b))
+
+    // VERIFICAR SE DADO VALOR É REAL
+    bool is_real(char test[]){
+        int i = 0, ponto = 0;
+        do{
+            if(isdigit(test[i])!=0 || test[i] == '.'){
+                if(test[i]=='.')
+                    ponto++;
+                if(ponto>1)
+                    return false;
+                i++;
+            } else
+                return false;
+        }while(test[i]!='\0');
+        
+        return true;
+    }
+
+    // VERIFICAR SE DADO VALOR É INTEIRO
+    bool is_int(char test[]){
+        int i = 0, ponto = 0;
+        do{
+            if(isdigit(test[i])!=0){
+                i++;
+            }
+            else
+                return false;
+        }while(test[i]!='\0');
+        return true;
+    }
+
+    int typeToInt(char t[]){
+        if (strcmp("texto", t)==0)
+                return 0;
+            else if (strcmp("inteiro", t)==0)
+                return 1;
+                else if (strcmp("real", t)==0)
+                    return 2;
+    }
+
+    char *intToType(int n){
+        if (n==0)
+                return "texto";
+            else if (n==1)
+                return "inteiro";
+                else if (n==2)
+                    return "real";
+    }
+
+    typedef struct ftype {
+        int type; // string se 0, int se 1, double se 2
+        char t[100];
+        int i;
+        double r;
+	} FTYPE;
 
     typedef struct variavels {
 		char name[50];
         int type; // string se 0, int se 1, double se 2
-        char tvalue[100];
-        int ivalue;
-        double rvalue;
+        char t[100];
+        int i;
+        double r;
 		struct variavels * prox;
 	} VARIAVELS;
 
-    typedef struct vars {
-		char name[50];
-        double value;
-		struct vars * prox;
-	} VARS;
+    typedef struct ast {
+        int type;
+        struct ast *l;
+        struct ast *r;
+    } AST;
 
-    typedef struct varts {
-		char name[50];
-		char value[100];
-		struct varts * prox;
-	} VARTS;
+    typedef struct flow{
+        int type;
+        AST *cond; 
+        AST *t1;
+        AST *e2;
+    } FLOW;
 
     //add nova variável na lista
-	VARS * ins(VARS *l, char n[]){
-		VARS *new =(VARS*)malloc(sizeof(VARS));
+	VARIAVELS * insVar(VARIAVELS *l, char n[], int type){
+		VARIAVELS *new =(VARIAVELS*)malloc(sizeof(VARIAVELS));
 		strcpy(new->name, n);
 		new->prox = l;
+        new->type = type;
+		return new;
+	}
+
+    VARIAVELS * insVarV(VARIAVELS *l, char n[], int type, FTYPE v){
+		VARIAVELS *new =(VARIAVELS*)malloc(sizeof(VARIAVELS));
+		new->prox = l;
+		strcpy(new->name, n);
+        new->type = type;
+        if (new->type == v.type){
+            if (new->type == 0)
+                strcpy(new->t, v.t);
+            else if (new->type == 1)
+                    new->i = v.i;
+                else if (new->type == 2)
+                    new->r = v.r;
+        } else {
+            if (new->type == 0){
+                if (v.type == 1)
+                    sprintf(new->t,"%d", v.i);
+                else if (v.type == 2)
+                    sprintf(new->t,"%f", v.r);
+            } else {
+                if (new->type == 1){
+                    if (v.type == 0)
+                        new->i = atoi(v.t);
+                    else if (v.type == 2)
+                        new->i = (int)v.r;
+                } else {
+                    if (new->type == 2){
+                        if (v.type == 0)
+                            new->r = atof(v.t);
+                        else if (v.type == 1)
+                            new->r = (double)v.i;
+                    }
+                }
+            }
+        }
 		return new;
 	}
 
     //add nova variável na lista
-    VARTS * inst(VARTS *l, char n[]){
-		VARTS *new =(VARTS*)malloc(sizeof(VARTS));
+	VARIAVELS * insVarI(VARIAVELS *l, char n[], int i){
+		VARIAVELS *new =(VARIAVELS*)malloc(sizeof(VARIAVELS));
 		strcpy(new->name, n);
-        strcpy(new->value, "");
 		new->prox = l;
+        new->type = 0;
+        new->i = i;
+		return new;
+	}
+
+    //add nova variável na lista
+	VARIAVELS * insVarR(VARIAVELS *l, char n[], double r){
+		VARIAVELS *new =(VARIAVELS*)malloc(sizeof(VARIAVELS));
+		strcpy(new->name, n);
+		new->prox = l;
+        new->type = 0;
+        new->r = r;
+		return new;
+	}
+
+    //add nova variável na lista texto
+	VARIAVELS * insVarT(VARIAVELS *l, char n[], char t[]){
+		VARIAVELS *new =(VARIAVELS*)malloc(sizeof(VARIAVELS));
+		strcpy(new->name, n);
+        new->type = 0;
+        strcpy(new->t, t);
+		return new;
+	}
+
+    //add nova variável na lista texto
+	VARIAVELS * pushVarVal(VARIAVELS *l, char n[], FTYPE v){
+        VARIAVELS *new = l;
+		while(new != NULL){
+            if(strcmp(n, new->name)==0){
+                if (new->type == v.type){
+                    if (new->type == 0)
+                        strcpy(new->t, v.t);
+                    else if (new->type == 1)
+                        new->i = v.i;
+                        else if (new->type == 2)
+                            new->r = v.r;
+                    return new;
+                } else {
+                    if (new->type == 0){
+                        if (v.type == 1)
+                            sprintf(new->t,"%d", v.i);
+                        else if (v.type == 2)
+                            sprintf(new->t,"%f", v.r);
+		                return new;
+                    } else {
+                        if (new->type == 1){
+                            if (v.type == 0){
+                                if (v.t[0]=='"')
+                                    strcpy(v.t, &v.t[1]) ;
+                                new->i = atoi(v.t);
+                            } else if (v.type == 2)
+                                new->i = (int)v.r;
+		                    return new;
+                        } else {
+                            if (new->type == 2){
+                                if (v.type == 0){
+                                    if (v.t[0]=='"')
+                                        strcpy(v.t, &v.t[1]) ;
+                                    new->r = atof(v.t);
+                                } else if (v.type == 1)
+                                    new->r = (double)v.i;
+		                        return new;
+                            }
+                        }
+                    }
+                }
+            }
+			new = new->prox;
+		}
 		return new;
 	}
 
     //busca uma variável na lista de variáveis
-	VARS *srch(VARS *l, char n[]){
-		VARS *aux = l;
+	VARIAVELS *srchVar(VARIAVELS *l, char n[]){
+		VARIAVELS *aux = l;
 		while(aux != NULL){
 			if(strcmp(n, aux->name)==0){
 				return aux;
@@ -130,42 +293,11 @@
 		}
 		return aux;
 	}
-	
-    //busca uma variável na lista de variáveis
-    VARTS *srcht(VARTS *l, char n[]){
-		VARTS *aux = l;
-		while(aux != NULL){
-			if(strcmp(n,aux->name)==0){
-				return aux;
-			}
-			aux = aux->prox;
-		}
-		return aux;
-	}
 
-    // VERIFICAR SE DADO VALOR É REAL
-    bool is_real(char test[]){
-        int i = 0;
-        int ponto = 0;
-        do{
-            if(isdigit(test[i])!=0 || test[i] == '.'){
-                if(test[i]=='.')
-                    ponto = ponto + 1;
-                if(ponto>1)
-                    return false;
-                i=i+1;
-            }
-            else
-                return false;
-        }while(test[i]!='\0');
-        
-        return true;
-    }
+    VARIAVELS *var0 = NULL;
+    
 
-	VARS *rvar;
-    VARTS *tvar;
-
-#line 169 "calc_elidian.tab.c"
+#line 301 "calc_elidian.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -207,11 +339,11 @@ extern int yydebug;
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
     TIPO = 258,                    /* TIPO  */
-    TIPO_REAL = 259,               /* TIPO_REAL  */
-    TIPO_TEXTO = 260,              /* TIPO_TEXTO  */
-    INTEIRO = 261,                 /* INTEIRO  */
-    REAL = 262,                    /* REAL  */
-    TEXTO = 263,                   /* TEXTO  */
+    TEXTO = 259,                   /* TEXTO  */
+    VAR = 260,                     /* VAR  */
+    COMENTARIO = 261,              /* COMENTARIO  */
+    INTEIRO = 262,                 /* INTEIRO  */
+    REAL = 263,                    /* REAL  */
     ENTRADA = 264,                 /* ENTRADA  */
     SAIDA = 265,                   /* SAIDA  */
     INICIO = 266,                  /* INICIO  */
@@ -219,20 +351,17 @@ extern int yydebug;
     IF = 268,                      /* IF  */
     ELSE = 269,                    /* ELSE  */
     FOR = 270,                     /* FOR  */
-    VAR = 271,                     /* VAR  */
-    OPV = 272,                     /* OPV  */
-    COMENTARIO = 273,              /* COMENTARIO  */
-    RAIZ = 274,                    /* RAIZ  */
-    COS = 275,                     /* COS  */
-    SIN = 276,                     /* SIN  */
-    REST = 277,                    /* REST  */
-    MAIOR = 278,                   /* MAIOR  */
-    MENOR = 279,                   /* MENOR  */
-    MEI = 280,                     /* MEI  */
-    MAI = 281,                     /* MAI  */
-    II = 282,                      /* II  */
-    DIF = 283,                     /* DIF  */
-    IMUNUS = 284                   /* IMUNUS  */
+    RAIZ = 271,                    /* RAIZ  */
+    COS = 272,                     /* COS  */
+    SIN = 273,                     /* SIN  */
+    REST = 274,                    /* REST  */
+    MAIOR = 275,                   /* MAIOR  */
+    MENOR = 276,                   /* MENOR  */
+    MEI = 277,                     /* MEI  */
+    MAI = 278,                     /* MAI  */
+    II = 279,                      /* II  */
+    DIF = 280,                     /* DIF  */
+    IMUNUS = 281                   /* IMUNUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -241,13 +370,15 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 99 "calc_elidian.y"
+#line 231 "calc_elidian.y"
 
     char texto[50];
     int inteiro;
     double real;
+    FTYPE ftype;
+    AST *a;
 
-#line 251 "calc_elidian.tab.c"
+#line 382 "calc_elidian.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -269,11 +400,11 @@ enum yysymbol_kind_t
   YYSYMBOL_YYerror = 1,                    /* error  */
   YYSYMBOL_YYUNDEF = 2,                    /* "invalid token"  */
   YYSYMBOL_TIPO = 3,                       /* TIPO  */
-  YYSYMBOL_TIPO_REAL = 4,                  /* TIPO_REAL  */
-  YYSYMBOL_TIPO_TEXTO = 5,                 /* TIPO_TEXTO  */
-  YYSYMBOL_INTEIRO = 6,                    /* INTEIRO  */
-  YYSYMBOL_REAL = 7,                       /* REAL  */
-  YYSYMBOL_TEXTO = 8,                      /* TEXTO  */
+  YYSYMBOL_TEXTO = 4,                      /* TEXTO  */
+  YYSYMBOL_VAR = 5,                        /* VAR  */
+  YYSYMBOL_COMENTARIO = 6,                 /* COMENTARIO  */
+  YYSYMBOL_INTEIRO = 7,                    /* INTEIRO  */
+  YYSYMBOL_REAL = 8,                       /* REAL  */
   YYSYMBOL_ENTRADA = 9,                    /* ENTRADA  */
   YYSYMBOL_SAIDA = 10,                     /* SAIDA  */
   YYSYMBOL_INICIO = 11,                    /* INICIO  */
@@ -281,51 +412,48 @@ enum yysymbol_kind_t
   YYSYMBOL_IF = 13,                        /* IF  */
   YYSYMBOL_ELSE = 14,                      /* ELSE  */
   YYSYMBOL_FOR = 15,                       /* FOR  */
-  YYSYMBOL_VAR = 16,                       /* VAR  */
-  YYSYMBOL_OPV = 17,                       /* OPV  */
-  YYSYMBOL_COMENTARIO = 18,                /* COMENTARIO  */
-  YYSYMBOL_RAIZ = 19,                      /* RAIZ  */
-  YYSYMBOL_COS = 20,                       /* COS  */
-  YYSYMBOL_SIN = 21,                       /* SIN  */
-  YYSYMBOL_REST = 22,                      /* REST  */
-  YYSYMBOL_MAIOR = 23,                     /* MAIOR  */
-  YYSYMBOL_MENOR = 24,                     /* MENOR  */
-  YYSYMBOL_MEI = 25,                       /* MEI  */
-  YYSYMBOL_MAI = 26,                       /* MAI  */
-  YYSYMBOL_II = 27,                        /* II  */
-  YYSYMBOL_DIF = 28,                       /* DIF  */
-  YYSYMBOL_29_ = 29,                       /* '+'  */
-  YYSYMBOL_30_ = 30,                       /* '-'  */
-  YYSYMBOL_31_ = 31,                       /* '*'  */
-  YYSYMBOL_32_ = 32,                       /* '/'  */
-  YYSYMBOL_33_ = 33,                       /* '^'  */
-  YYSYMBOL_34_ = 34,                       /* ')'  */
-  YYSYMBOL_35_ = 35,                       /* '('  */
-  YYSYMBOL_36_ = 36,                       /* '|'  */
-  YYSYMBOL_IMUNUS = 37,                    /* IMUNUS  */
-  YYSYMBOL_38_ = 38,                       /* '='  */
-  YYSYMBOL_39_ = 39,                       /* ':'  */
-  YYSYMBOL_40_ = 40,                       /* ','  */
-  YYSYMBOL_41_ = 41,                       /* ';'  */
-  YYSYMBOL_YYACCEPT = 42,                  /* $accept  */
-  YYSYMBOL_prog = 43,                      /* prog  */
-  YYSYMBOL_cod = 44,                       /* cod  */
-  YYSYMBOL_exp = 45,                       /* exp  */
-  YYSYMBOL_vart = 46,                      /* vart  */
-  YYSYMBOL_vart1 = 47,                     /* vart1  */
-  YYSYMBOL_var = 48,                       /* var  */
-  YYSYMBOL_var1 = 49,                      /* var1  */
-  YYSYMBOL_arit = 50,                      /* arit  */
-  YYSYMBOL_arit1 = 51,                     /* arit1  */
-  YYSYMBOL_arit2 = 52,                     /* arit2  */
-  YYSYMBOL_arit3 = 53,                     /* arit3  */
-  YYSYMBOL_valor = 54,                     /* valor  */
-  YYSYMBOL_logica = 55,                    /* logica  */
-  YYSYMBOL_L1 = 56,                        /* L1  */
-  YYSYMBOL_L2 = 57,                        /* L2  */
-  YYSYMBOL_saida = 58,                     /* saida  */
-  YYSYMBOL_if = 59,                        /* if  */
-  YYSYMBOL_for = 60                        /* for  */
+  YYSYMBOL_RAIZ = 16,                      /* RAIZ  */
+  YYSYMBOL_COS = 17,                       /* COS  */
+  YYSYMBOL_SIN = 18,                       /* SIN  */
+  YYSYMBOL_REST = 19,                      /* REST  */
+  YYSYMBOL_MAIOR = 20,                     /* MAIOR  */
+  YYSYMBOL_MENOR = 21,                     /* MENOR  */
+  YYSYMBOL_MEI = 22,                       /* MEI  */
+  YYSYMBOL_MAI = 23,                       /* MAI  */
+  YYSYMBOL_II = 24,                        /* II  */
+  YYSYMBOL_DIF = 25,                       /* DIF  */
+  YYSYMBOL_26_ = 26,                       /* '+'  */
+  YYSYMBOL_27_ = 27,                       /* '-'  */
+  YYSYMBOL_28_ = 28,                       /* '*'  */
+  YYSYMBOL_29_ = 29,                       /* '/'  */
+  YYSYMBOL_30_ = 30,                       /* '^'  */
+  YYSYMBOL_31_ = 31,                       /* ')'  */
+  YYSYMBOL_32_ = 32,                       /* '('  */
+  YYSYMBOL_33_ = 33,                       /* '|'  */
+  YYSYMBOL_IMUNUS = 34,                    /* IMUNUS  */
+  YYSYMBOL_35_ = 35,                       /* ':'  */
+  YYSYMBOL_36_ = 36,                       /* '='  */
+  YYSYMBOL_37_ = 37,                       /* ','  */
+  YYSYMBOL_38_ = 38,                       /* ';'  */
+  YYSYMBOL_YYACCEPT = 39,                  /* $accept  */
+  YYSYMBOL_prog = 40,                      /* prog  */
+  YYSYMBOL_cod = 41,                       /* cod  */
+  YYSYMBOL_exp = 42,                       /* exp  */
+  YYSYMBOL_atrib = 43,                     /* atrib  */
+  YYSYMBOL_ivar = 44,                      /* ivar  */
+  YYSYMBOL_ivar2 = 45,                     /* ivar2  */
+  YYSYMBOL_val = 46,                       /* val  */
+  YYSYMBOL_arit = 47,                      /* arit  */
+  YYSYMBOL_arit1 = 48,                     /* arit1  */
+  YYSYMBOL_arit2 = 49,                     /* arit2  */
+  YYSYMBOL_arit3 = 50,                     /* arit3  */
+  YYSYMBOL_valor = 51,                     /* valor  */
+  YYSYMBOL_logica = 52,                    /* logica  */
+  YYSYMBOL_L1 = 53,                        /* L1  */
+  YYSYMBOL_L2 = 54,                        /* L2  */
+  YYSYMBOL_saida = 55,                     /* saida  */
+  YYSYMBOL_if = 56,                        /* if  */
+  YYSYMBOL_for = 57                        /* for  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -635,19 +763,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  4
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   199
+#define YYLAST   248
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  42
+#define YYNTOKENS  39
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  19
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  63
+#define YYNRULES  59
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  123
+#define YYNSTATES  115
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   284
+#define YYMAXUTOK   281
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -665,15 +793,15 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      35,    34,    31,    29,    40,    30,     2,    32,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,    39,    41,
-       2,    38,     2,     2,     2,     2,     2,     2,     2,     2,
+      32,    31,    28,    26,    37,    27,     2,    29,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,    35,    38,
+       2,    36,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,    30,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,    33,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,    36,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -689,20 +817,19 @@ static const yytype_int8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    37
+      25,    34
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   143,   143,   145,   146,   148,   157,   166,   186,   187,
-     188,   189,   223,   224,   225,   226,   227,   230,   232,   233,
-     235,   244,   260,   287,   288,   290,   299,   316,   320,   324,
-     328,   332,   336,   340,   344,   346,   350,   354,   358,   360,
-     364,   366,   367,   369,   370,   371,   390,   391,   392,   393,
-     394,   395,   397,   399,   400,   403,   409,   410,   411,   412,
-     427,   429,   430,   432
+       0,   266,   266,   268,   269,   271,   272,   273,   306,   307,
+     308,   309,   310,   311,   313,   320,   327,   334,   336,   344,
+     354,   355,   356,   357,   372,   377,   382,   387,   392,   402,
+     419,   436,   438,   455,   479,   499,   501,   521,   523,   524,
+     526,   530,   534,   550,   552,   553,   554,   555,   556,   557,
+     559,   561,   562,   572,   580,   588,   589,   591,   594,   598
 };
 #endif
 
@@ -718,14 +845,13 @@ static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "\"end of file\"", "error", "\"invalid token\"", "TIPO", "TIPO_REAL",
-  "TIPO_TEXTO", "INTEIRO", "REAL", "TEXTO", "ENTRADA", "SAIDA", "INICIO",
-  "FINAL", "IF", "ELSE", "FOR", "VAR", "OPV", "COMENTARIO", "RAIZ", "COS",
-  "SIN", "REST", "MAIOR", "MENOR", "MEI", "MAI", "II", "DIF", "'+'", "'-'",
-  "'*'", "'/'", "'^'", "')'", "'('", "'|'", "IMUNUS", "'='", "':'", "','",
-  "';'", "$accept", "prog", "cod", "exp", "vart", "vart1", "var", "var1",
-  "arit", "arit1", "arit2", "arit3", "valor", "logica", "L1", "L2",
-  "saida", "if", "for", YY_NULLPTR
+  "\"end of file\"", "error", "\"invalid token\"", "TIPO", "TEXTO", "VAR",
+  "COMENTARIO", "INTEIRO", "REAL", "ENTRADA", "SAIDA", "INICIO", "FINAL",
+  "IF", "ELSE", "FOR", "RAIZ", "COS", "SIN", "REST", "MAIOR", "MENOR",
+  "MEI", "MAI", "II", "DIF", "'+'", "'-'", "'*'", "'/'", "'^'", "')'",
+  "'('", "'|'", "IMUNUS", "':'", "'='", "','", "';'", "$accept", "prog",
+  "cod", "exp", "atrib", "ivar", "ivar2", "val", "arit", "arit1", "arit2",
+  "arit3", "valor", "logica", "L1", "L2", "saida", "if", "for", YY_NULLPTR
 };
 
 static const char *
@@ -742,18 +868,17 @@ static const yytype_int16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
-     275,   276,   277,   278,   279,   280,   281,   282,   283,    43,
-      45,    42,    47,    94,    41,    40,   124,   284,    61,    58,
-      44,    59
+     275,   276,   277,   278,   279,   280,    43,    45,    42,    47,
+      94,    41,    40,   124,   281,    58,    61,    44,    59
 };
 #endif
 
-#define YYPACT_NINF (-73)
+#define YYPACT_NINF (-61)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
 
-#define YYTABLE_NINF (-55)
+#define YYTABLE_NINF (-53)
 
 #define yytable_value_is_error(Yyn) \
   0
@@ -762,19 +887,18 @@ static const yytype_int16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-      -4,   -73,    15,    84,   -73,    27,    27,    31,    97,   -73,
-     136,   143,     7,   -73,   136,   -73,    11,    13,   -73,    13,
-      19,    20,   -73,   -73,   -73,    22,   -73,    43,    33,    39,
-      42,   143,   143,   143,   -19,    48,   -73,    58,   -73,   -73,
-     136,   -12,    54,   165,   -73,   -73,    46,   -73,   -73,   118,
-     157,   -73,   143,    27,     5,    31,    97,    55,   143,   143,
-     143,   -73,    81,   -10,    -2,    -2,    97,    -2,    -2,    -2,
-      -2,    81,    64,   -73,   136,   136,   136,   136,   136,   136,
-     -73,   -73,    85,   -12,   -12,   -73,   -73,    90,   -73,   -73,
-      97,   111,   117,   131,   -73,   -73,    48,    48,   -73,   -73,
-     -73,   -73,   -73,   -73,    24,   -73,   -73,   -73,   -73,   -73,
-     -73,    51,   -73,   -73,   -73,   -73,   -73,   -73,   -73,   -73,
-     -73,    68,   -73
+      -6,   -61,    18,   143,   -61,     6,   -61,    -8,   -61,   -61,
+     -61,   197,   -61,   197,   215,   -10,    17,    34,   215,   197,
+     215,   197,   -61,   -61,    10,   -61,    -1,     2,   -61,     4,
+     -61,    45,   142,   -61,   -61,   -61,    33,   -61,   215,   -61,
+      70,    48,   -61,    64,   215,    -3,   215,   215,   215,   -61,
+      28,    -2,    30,   106,   -61,    97,    12,    12,    12,    12,
+      12,    12,   -61,   197,   197,   197,   197,   197,   197,   215,
+      -1,   197,   197,   -61,    28,   -61,    74,   110,   146,   -61,
+     -61,   -61,    72,     2,     2,   -61,   -61,   -61,   -61,    35,
+     -61,   -61,   -61,   -61,   -61,   -61,    -1,   -61,   -61,   176,
+      71,   -61,   -61,   -61,   230,   -61,   -61,   -61,   -61,   -61,
+     -61,   -61,   -61,   107,   -61
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -782,33 +906,32 @@ static const yytype_int16 yypact[] =
      means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
-       0,     4,     0,     0,     1,     0,     0,     0,     0,     2,
-       0,     0,     0,    16,     0,     3,    25,     8,    24,     9,
-      20,    10,    19,    43,    44,    55,    45,     0,     0,     0,
-       0,     0,     0,     0,    57,    34,    38,    40,    42,    17,
-       0,    54,     0,     0,    52,    14,     0,    15,    11,     0,
-      12,    13,     0,     0,     0,     0,     0,    59,     0,     0,
-       0,    30,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,    54,     0,     4,     0,     0,     0,     0,     0,     0,
-       4,     6,     0,     5,    26,    23,    21,     0,    18,    56,
-       0,     0,     0,     0,    41,    31,    32,    33,    58,    37,
-      35,    36,    39,    53,     0,    46,    47,    49,    48,    50,
-      51,     0,     7,    22,    60,    29,    28,    27,     4,    62,
-      63,     0,    61
+       0,     4,     0,     0,     1,     0,    43,    42,    12,    40,
+      41,     0,     2,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     3,     5,     6,    17,    52,    31,    35,    37,
+      39,     0,     0,    50,    10,    11,    18,     7,     0,    42,
+      53,    55,    13,     0,     0,     0,     0,     0,     0,    27,
+      52,     0,     0,     8,     9,     0,     0,     0,     0,     0,
+       0,     0,     4,     0,     0,     0,     0,     0,     0,     0,
+      14,     0,     0,     4,     0,     4,     0,     0,     0,    38,
+      51,    28,    15,    29,    30,    34,    32,    33,    36,     0,
+      44,    45,    47,    46,    48,    49,    19,    54,    56,     0,
+       0,    26,    25,    24,     0,    58,     4,    59,    20,    23,
+      21,    22,    16,     0,    57
 };
 
   /* YYPGOTO[NTERM-NUM].  */
-static const yytype_int8 yypgoto[] =
+static const yytype_int16 yypgoto[] =
 {
-     -73,   -73,   -72,   -73,   -73,    53,   106,    75,    -8,   -34,
-      52,   -73,   -73,    -5,   -73,   120,   -54,   -73,   -73
+     -61,   -61,   -60,   -61,   -61,   -61,   -61,   -61,   -11,    15,
+     167,   -61,   -61,    -7,   -61,   132,    11,   -61,   -61
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     2,     3,    15,    21,    22,    17,    18,    41,    35,
-      36,    37,    38,    42,    43,    44,    39,    45,    47
+      -1,     2,     3,    22,    23,    24,    25,   112,    26,    27,
+      28,    29,    30,    31,    32,    33,    42,    34,    35
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -816,93 +939,100 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      34,   104,    89,    46,    23,    24,    50,     1,   111,    51,
-      64,    65,    98,    86,    26,     4,    48,    64,    65,    64,
-      65,    66,    87,    61,    62,    63,    95,     5,     6,     7,
-      96,    97,    71,    32,     8,    72,   114,    10,   118,    11,
-      12,    83,    13,    16,    84,    49,   121,    20,    34,    52,
-      91,    92,    93,    53,     5,     6,     7,    54,    34,    57,
-      55,     8,    56,    14,    10,   119,    11,    12,    58,    13,
-      67,     5,     6,     7,    59,    64,    65,    60,     8,    68,
-      69,    10,    34,    11,    12,    80,    13,     5,     6,     7,
-      14,    70,   120,    73,     8,    90,     9,    10,   103,    11,
-      12,   112,    13,    23,    24,    25,   113,    14,    88,   122,
-      64,    65,    19,    26,    27,    94,    28,    29,    30,    99,
-     100,   101,   102,    14,    23,    24,    81,    31,    85,     0,
-       0,     0,    32,    33,    26,    82,     0,    28,    29,    30,
-      64,    65,    23,    24,     0,   115,    64,    65,    31,    23,
-      24,   116,    26,    32,    33,    28,    29,    30,     0,    26,
-      64,    65,    28,    29,    30,   117,    31,     0,     0,     0,
-       0,    40,    33,    31,     0,     0,     0,     0,    32,    33,
-     -54,   -54,   -54,   -54,   -54,   -54,    64,    65,    74,    75,
-      76,    77,    78,    79,   105,   106,   107,   108,   109,   110
+      40,    37,    89,    45,    41,     1,    43,    49,    50,    52,
+      53,    36,    51,    99,    54,   100,     6,    39,     4,     9,
+      10,    58,    46,    56,    57,    56,    57,    70,    38,    80,
+      59,    60,    75,    74,    61,    76,    77,    78,     5,     6,
+       7,     8,     9,    10,    44,    11,   113,    55,    13,    47,
+      14,    15,    16,    17,    56,    57,    56,    57,    96,    79,
+      40,    40,    18,    81,    41,    41,    48,    19,    20,    69,
+      21,    83,    84,   105,     5,     6,     7,     8,     9,    10,
+      62,    11,    97,    98,    13,    72,    14,    15,    16,    17,
+     -52,   -52,   -52,   -52,   -52,   -52,    56,    57,    18,    73,
+      56,    57,    82,    19,    20,   101,    21,    71,   104,   107,
+       5,     6,     7,     8,     9,    10,     0,    11,     0,     0,
+      13,     0,    14,    15,    16,    17,   -52,   -52,   -52,   -52,
+     -52,   -52,    56,    57,    18,     0,    56,    57,     0,    19,
+      20,   102,    21,     0,     0,   114,     5,     6,     7,     8,
+       9,    10,     0,    11,     0,    12,    13,     0,    14,    15,
+      16,    17,    63,    64,    65,    66,    67,    68,     0,     0,
+      18,     0,    56,    57,     0,    19,    20,   103,    21,     5,
+       6,     7,     8,     9,    10,     0,    11,     0,     0,    13,
+     106,    14,    15,    16,    17,    90,    91,    92,    93,    94,
+      95,     6,    39,    18,     9,    10,     0,     0,    19,    20,
+       0,    21,     0,    15,    16,    17,     0,     0,     0,     6,
+      39,     0,     9,    10,    18,    85,    86,    87,    88,    19,
+      20,    15,    16,    17,   108,   109,     0,   110,   111,     0,
+       0,     0,    18,     0,     0,     0,     0,    44,    20
 };
 
 static const yytype_int8 yycheck[] =
 {
-       8,    73,    56,    11,     6,     7,    14,    11,    80,    14,
-      29,    30,    66,     8,    16,     0,     9,    29,    30,    29,
-      30,    40,    17,    31,    32,    33,    36,     3,     4,     5,
-      64,    65,    40,    35,    10,    40,    90,    13,    14,    15,
-      16,    49,    18,    16,    52,    38,   118,    16,    56,    38,
-      58,    59,    60,    40,     3,     4,     5,    38,    66,    16,
-      40,    10,    40,    39,    13,    41,    15,    16,    35,    18,
-      22,     3,     4,     5,    35,    29,    30,    35,    10,    31,
-      32,    13,    90,    15,    16,    39,    18,     3,     4,     5,
-      39,    33,    41,    39,    10,    40,    12,    13,    34,    15,
-      16,    16,    18,     6,     7,     8,    16,    39,    55,    41,
-      29,    30,     6,    16,    17,    34,    19,    20,    21,    67,
-      68,    69,    70,    39,     6,     7,     8,    30,    53,    -1,
-      -1,    -1,    35,    36,    16,    17,    -1,    19,    20,    21,
-      29,    30,     6,     7,    -1,    34,    29,    30,    30,     6,
-       7,    34,    16,    35,    36,    19,    20,    21,    -1,    16,
-      29,    30,    19,    20,    21,    34,    30,    -1,    -1,    -1,
-      -1,    35,    36,    30,    -1,    -1,    -1,    -1,    35,    36,
-      23,    24,    25,    26,    27,    28,    29,    30,    23,    24,
-      25,    26,    27,    28,    74,    75,    76,    77,    78,    79
+      11,     9,    62,    14,    11,    11,    13,    18,    19,    20,
+      21,     5,    19,    73,    21,    75,     4,     5,     0,     7,
+       8,    19,    32,    26,    27,    26,    27,    38,    36,    31,
+      28,    29,    35,    44,    30,    46,    47,    48,     3,     4,
+       5,     6,     7,     8,    32,    10,   106,    37,    13,    32,
+      15,    16,    17,    18,    26,    27,    26,    27,    69,    31,
+      71,    72,    27,    33,    71,    72,    32,    32,    33,    36,
+      35,    56,    57,    38,     3,     4,     5,     6,     7,     8,
+      35,    10,    71,    72,    13,    37,    15,    16,    17,    18,
+      20,    21,    22,    23,    24,    25,    26,    27,    27,    35,
+      26,    27,     5,    32,    33,    31,    35,    37,    36,    38,
+       3,     4,     5,     6,     7,     8,    -1,    10,    -1,    -1,
+      13,    -1,    15,    16,    17,    18,    20,    21,    22,    23,
+      24,    25,    26,    27,    27,    -1,    26,    27,    -1,    32,
+      33,    31,    35,    -1,    -1,    38,     3,     4,     5,     6,
+       7,     8,    -1,    10,    -1,    12,    13,    -1,    15,    16,
+      17,    18,    20,    21,    22,    23,    24,    25,    -1,    -1,
+      27,    -1,    26,    27,    -1,    32,    33,    31,    35,     3,
+       4,     5,     6,     7,     8,    -1,    10,    -1,    -1,    13,
+      14,    15,    16,    17,    18,    63,    64,    65,    66,    67,
+      68,     4,     5,    27,     7,     8,    -1,    -1,    32,    33,
+      -1,    35,    -1,    16,    17,    18,    -1,    -1,    -1,     4,
+       5,    -1,     7,     8,    27,    58,    59,    60,    61,    32,
+      33,    16,    17,    18,     4,     5,    -1,     7,     8,    -1,
+      -1,    -1,    27,    -1,    -1,    -1,    -1,    32,    33
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    11,    43,    44,     0,     3,     4,     5,    10,    12,
-      13,    15,    16,    18,    39,    45,    16,    48,    49,    48,
-      16,    46,    47,     6,     7,     8,    16,    17,    19,    20,
-      21,    30,    35,    36,    50,    51,    52,    53,    54,    58,
-      35,    50,    55,    56,    57,    59,    50,    60,     9,    38,
-      50,    55,    38,    40,    38,    40,    40,    16,    35,    35,
-      35,    50,    50,    50,    29,    30,    40,    22,    31,    32,
-      33,    50,    55,    39,    23,    24,    25,    26,    27,    28,
-      39,     8,    17,    50,    50,    49,     8,    17,    47,    58,
-      40,    50,    50,    50,    34,    36,    51,    51,    58,    52,
-      52,    52,    52,    34,    44,    57,    57,    57,    57,    57,
-      57,    44,    16,    16,    58,    34,    34,    34,    14,    41,
-      41,    44,    41
+       0,    11,    40,    41,     0,     3,     4,     5,     6,     7,
+       8,    10,    12,    13,    15,    16,    17,    18,    27,    32,
+      33,    35,    42,    43,    44,    45,    47,    48,    49,    50,
+      51,    52,    53,    54,    56,    57,     5,     9,    36,     5,
+      47,    52,    55,    52,    32,    47,    32,    32,    32,    47,
+      47,    52,    47,    47,    52,    37,    26,    27,    19,    28,
+      29,    30,    35,    20,    21,    22,    23,    24,    25,    36,
+      47,    37,    37,    35,    47,    35,    47,    47,    47,    31,
+      31,    33,     5,    48,    48,    49,    49,    49,    49,    41,
+      54,    54,    54,    54,    54,    54,    47,    55,    55,    41,
+      41,    31,    31,    31,    36,    38,    14,    38,     4,     5,
+       7,     8,    46,    41,    38
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    42,    43,    44,    44,    45,    45,    45,    45,    45,
-      45,    45,    45,    45,    45,    45,    45,    45,    46,    46,
-      47,    47,    47,    48,    48,    49,    49,    50,    50,    50,
-      50,    50,    50,    50,    50,    51,    51,    51,    51,    52,
-      52,    53,    53,    54,    54,    54,    55,    55,    55,    55,
-      55,    55,    56,    57,    57,    58,    58,    58,    58,    58,
-      58,    59,    59,    60
+       0,    39,    40,    41,    41,    42,    42,    42,    42,    42,
+      42,    42,    42,    42,    43,    44,    44,    44,    45,    45,
+      46,    46,    46,    46,    47,    47,    47,    47,    47,    47,
+      47,    47,    48,    48,    48,    48,    49,    49,    50,    50,
+      51,    51,    51,    51,    52,    52,    52,    52,    52,    52,
+      53,    54,    54,    55,    55,    55,    55,    56,    56,    57
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_int8 yyr2[] =
 {
-       0,     2,     3,     2,     0,     3,     3,     4,     2,     2,
-       2,     2,     2,     2,     2,     2,     1,     2,     3,     1,
-       1,     3,     4,     3,     1,     1,     3,     4,     4,     4,
-       2,     3,     3,     3,     1,     3,     3,     3,     1,     3,
-       1,     3,     1,     1,     1,     1,     3,     3,     3,     3,
-       3,     3,     1,     3,     1,     1,     3,     1,     3,     2,
-       4,     6,     4,     4
+       0,     2,     3,     2,     0,     1,     1,     2,     2,     2,
+       1,     1,     1,     2,     3,     3,     5,     1,     2,     4,
+       1,     1,     1,     1,     4,     4,     4,     2,     3,     3,
+       3,     1,     3,     3,     3,     1,     3,     1,     3,     1,
+       1,     1,     1,     1,     3,     3,     3,     3,     3,     3,
+       1,     3,     1,     1,     3,     1,     3,     7,     4,     5
 };
 
 
@@ -1370,559 +1500,600 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* prog: INICIO cod FINAL  */
-#line 143 "calc_elidian.y"
+#line 266 "calc_elidian.y"
                        {;printf("PROGRAMA FINALIZADO\n");}
-#line 1376 "calc_elidian.tab.c"
+#line 1506 "calc_elidian.tab.c"
     break;
 
-  case 5: /* exp: VAR '=' arit  */
-#line 148 "calc_elidian.y"
-                  {
-        //atribuição de variavel REAL
-        VARS * aux = srch(rvar, (yyvsp[-2].texto));
-        if (aux == NULL)
-            printf ("Variável '%s' não foi declarada\n", (yyvsp[-2].texto));
-        else {
-            aux->value = (yyvsp[0].real);
-        }
-    }
-#line 1390 "calc_elidian.tab.c"
+  case 5: /* exp: atrib  */
+#line 271 "calc_elidian.y"
+           {}
+#line 1512 "calc_elidian.tab.c"
     break;
 
-  case 6: /* exp: VAR '=' TEXTO  */
-#line 157 "calc_elidian.y"
-                    {
-        //atribuição de variavel TEXTO
-        VARTS * aux = srcht(tvar, (yyvsp[-2].texto));
-        if (aux == NULL)
-            printf ("Variável '%s' não foi declarada\n", (yyvsp[-2].texto));
-        else {
-            gets(aux->value);
-        }
-    }
-#line 1404 "calc_elidian.tab.c"
-    break;
-
-  case 7: /* exp: VAR '=' OPV VAR  */
-#line 166 "calc_elidian.y"
-                      {
-        //atribuição de variavel TEXTO
-        VARTS * aux = srcht(tvar, (yyvsp[-3].texto));
-        if (aux == NULL)
-            printf ("Variável '%s' não foi declarada.\n", (yyvsp[-3].texto));
-        else {
-            VARTS * aux2 = srcht(tvar, (yyvsp[0].texto));
-            if (aux2 == NULL){
-                VARS * aux3 = srch(rvar, (yyvsp[0].texto));
-                if(aux3 == NULL)
-                    printf ("Variavel '%s' nao foi declarada\n", (yyvsp[0].texto));
-                else
-                    sprintf(aux->value, "%f", aux3->value);
-            }
-            else {
-                //se for variavel texto
-                strcpy(aux->value, aux2->value);
-            }
-        }
-    }
-#line 1429 "calc_elidian.tab.c"
-    break;
-
-  case 8: /* exp: TIPO var  */
-#line 186 "calc_elidian.y"
-               {printf("tipo: %s %s\n", (yyvsp[-1].texto), (yyvsp[0].texto)); }
-#line 1435 "calc_elidian.tab.c"
-    break;
-
-  case 9: /* exp: TIPO_REAL var  */
-#line 187 "calc_elidian.y"
-                    {printf("tipo real: %s %s\n", (yyvsp[-1].texto), (yyvsp[0].texto)); }
-#line 1441 "calc_elidian.tab.c"
-    break;
-
-  case 10: /* exp: TIPO_TEXTO vart  */
-#line 188 "calc_elidian.y"
-                      {printf("tipo texto: %s %s\n", (yyvsp[-1].texto), (yyvsp[0].texto)); }
-#line 1447 "calc_elidian.tab.c"
-    break;
-
-  case 11: /* exp: VAR ENTRADA  */
-#line 189 "calc_elidian.y"
-                  {
-        VARS * aux = srch(rvar, (yyvsp[-1].texto));
-        if (aux == NULL){
-            //se nao existe variavel declarada real
-            VARTS * aux2 = srcht(tvar, (yyvsp[-1].texto));
-            if (aux2 == NULL){
-                //se tbm nao existe variavel declarada texto
-                printf ("Variavel '%s' nao foi declarada\n", (yyvsp[-1].texto));
-            }
-            else {
-                //se for variavel texto
-                scanf("%s", &aux2->value);
-            }
-        }
-        else {
-            //se for variavel real
-            //verificar se o valor corresponde ao tipo real
-            char test[100];
-            do{
-                int i = 0;
-                do{
-                    test[i] = '\0';
-                    i++;
-                }while(test[i]!='\0');
-
-                scanf("%s", &test);
-                if( is_real(test)==false )
-                    printf ("Valor '%s' deve ser real\n", (yyvsp[-1].texto));
-                
-            }while( is_real(test)==false );
-            
-            aux->value = atof(test);
-        }
-    }
-#line 1486 "calc_elidian.tab.c"
-    break;
-
-  case 12: /* exp: ':' arit  */
-#line 223 "calc_elidian.y"
-               {printf("RESULTADO ARITMETICO: %f\n", (yyvsp[0].real)); }
-#line 1492 "calc_elidian.tab.c"
-    break;
-
-  case 13: /* exp: ':' logica  */
-#line 224 "calc_elidian.y"
-                 { if ((yyvsp[0].real) != 0) printf("RESULTADO LOGICA: TRUE\n"); else printf("RESULTADO LOGICA: FALSE\n"); }
-#line 1498 "calc_elidian.tab.c"
-    break;
-
-  case 14: /* exp: IF if  */
-#line 225 "calc_elidian.y"
-            {}
-#line 1504 "calc_elidian.tab.c"
-    break;
-
-  case 15: /* exp: FOR for  */
-#line 226 "calc_elidian.y"
-              {}
-#line 1510 "calc_elidian.tab.c"
-    break;
-
-  case 16: /* exp: COMENTARIO  */
-#line 227 "calc_elidian.y"
-                 {
-        printf("COMENTARIO: %s\n", (yyvsp[0].texto));
-    }
+  case 6: /* exp: ivar  */
+#line 272 "calc_elidian.y"
+           {}
 #line 1518 "calc_elidian.tab.c"
     break;
 
-  case 17: /* exp: SAIDA saida  */
-#line 230 "calc_elidian.y"
+  case 7: /* exp: VAR ENTRADA  */
+#line 273 "calc_elidian.y"
+                  {
+        char test[100];
+        int i = 0;
+        do {
+            test[i] = '\0';
+            i++;
+        } while(test[i]!='\0');
+        scanf("%s", &test);
+        if ( is_int(test)==true ){
+            FTYPE new;
+            new.type = 1;
+            new.i = atoi(test);
+            VARIAVELS *aux = pushVarVal(var0, (yyvsp[-1].texto), new);
+            if (aux==NULL)
+                printf("ERRO 305: Variavel %s ainda nao declarada\n", (yyvsp[-1].texto));
+        } else {
+            if (is_real(test)==true ){
+                FTYPE new;
+                new.type = 2;
+                new.r = atof(test);
+                VARIAVELS *aux = pushVarVal(var0, (yyvsp[-1].texto), new);
+                if (aux==NULL)
+                    printf("ERRO 313: Variavel %s ainda nao declarada\n", (yyvsp[-1].texto));
+            } else {
+                FTYPE new;
+                new.type = 0;
+                strcpy(new.t, test);
+                VARIAVELS *aux = pushVarVal(var0, (yyvsp[-1].texto), new);
+                if (aux==NULL)
+                    printf("ERRO 320: Variavel %s ainda nao declarada\n", (yyvsp[-1].texto));
+            }
+        }
+    }
+#line 1556 "calc_elidian.tab.c"
+    break;
+
+  case 8: /* exp: ':' arit  */
+#line 306 "calc_elidian.y"
+               {printf("RESULTADO ARITMETICO: %f\n", (yyvsp[0].ftype)); }
+#line 1562 "calc_elidian.tab.c"
+    break;
+
+  case 9: /* exp: ':' logica  */
+#line 307 "calc_elidian.y"
+                 { if ((yyvsp[0].inteiro) != 0) printf("RESULTADO LOGICA: TRUE\n"); else printf("RESULTADO LOGICA: FALSE\n"); }
+#line 1568 "calc_elidian.tab.c"
+    break;
+
+  case 10: /* exp: if  */
+#line 308 "calc_elidian.y"
+         {}
+#line 1574 "calc_elidian.tab.c"
+    break;
+
+  case 11: /* exp: for  */
+#line 309 "calc_elidian.y"
+          {}
+#line 1580 "calc_elidian.tab.c"
+    break;
+
+  case 12: /* exp: COMENTARIO  */
+#line 310 "calc_elidian.y"
+                 { printf("COMENTARIO: %s\n", (yyvsp[0].texto));}
+#line 1586 "calc_elidian.tab.c"
+    break;
+
+  case 13: /* exp: SAIDA saida  */
+#line 311 "calc_elidian.y"
                   {printf("%s\n", (yyvsp[0].texto)); }
-#line 1524 "calc_elidian.tab.c"
+#line 1592 "calc_elidian.tab.c"
     break;
 
-  case 18: /* vart: vart ',' vart1  */
-#line 232 "calc_elidian.y"
-                     {sprintf((yyval.texto), "%s, %s", (yyvsp[-2].texto), (yyvsp[0].texto)); }
-#line 1530 "calc_elidian.tab.c"
-    break;
-
-  case 19: /* vart: vart1  */
-#line 233 "calc_elidian.y"
-            {sprintf((yyval.texto), "%s", (yyvsp[0].texto)); }
-#line 1536 "calc_elidian.tab.c"
-    break;
-
-  case 20: /* vart1: VAR  */
-#line 235 "calc_elidian.y"
-           {
-        VARTS * aux = srcht(tvar, (yyvsp[0].texto));
-        if (aux == NULL){
-            tvar = inst(tvar, (yyvsp[0].texto));
-            sprintf((yyval.texto), "%s", (yyvsp[0].texto));
-        }
-        else
-            printf ("A variável '%s' já existe.\n", (yyvsp[0].texto));
-    }
-#line 1550 "calc_elidian.tab.c"
-    break;
-
-  case 21: /* vart1: VAR '=' TEXTO  */
-#line 244 "calc_elidian.y"
+  case 14: /* atrib: VAR '=' arit  */
+#line 313 "calc_elidian.y"
                     {
-        VARTS * aux = srcht(tvar, (yyvsp[-2].texto));
-        if (aux == NULL){
-            tvar = inst(tvar, (yyvsp[-2].texto));
-            
-            VARTS * aux2 = srcht(tvar, (yyvsp[-2].texto));
-            if (aux2 == NULL)
-                printf ("Variavel '%s' nao foi declarada corretamente.\n", (yyvsp[-2].texto));
-            else {
-                strcpy(aux2->value, (yyvsp[0].texto));
-                sprintf((yyval.texto), "%s = %s", (yyvsp[-2].texto), (yyvsp[0].texto));
-            }
-        }
-        else
-            printf ("A variavel '%s' ja existe.\n", (yyvsp[-2].texto));
+        //atribuição de variavel REAL
+        VARIAVELS * aux = pushVarVal(var0, (yyvsp[-2].texto), (yyvsp[0].ftype));
+        if (aux == NULL)
+            printf ("ERRO 2: Variável '%s' não foi declarada\n", (yyvsp[-2].texto));
     }
-#line 1571 "calc_elidian.tab.c"
+#line 1603 "calc_elidian.tab.c"
     break;
 
-  case 22: /* vart1: VAR '=' OPV VAR  */
-#line 260 "calc_elidian.y"
-                      {
-        VARTS * aux = srcht(tvar, (yyvsp[-3].texto));
+  case 15: /* ivar: ivar ',' VAR  */
+#line 320 "calc_elidian.y"
+                   { 
+        VARIAVELS * aux = srchVar(var0, (yyvsp[0].texto));
         if (aux == NULL){
-            tvar = inst(tvar, (yyvsp[-3].texto));
-            
-            VARTS * aux2 = srcht(tvar, (yyvsp[-3].texto)); //nova variavel a ser atribuida valor
-            if (aux2 == NULL)
-                printf ("Variavel '%s' nao foi declarada\n", (yyvsp[-3].texto));
-            else {
-                VARTS * aux3 = srcht(tvar, (yyvsp[0].texto));
-                if (aux3 == NULL){
-                    VARS * aux4 = srch(rvar, (yyvsp[0].texto));
-                    if(aux4 == NULL)
-                        printf ("Variavel '%s' nao foi declarada\n", (yyvsp[0].texto));
-                    else
-                        sprintf(aux2->value, "%f", aux4->value);
-                }
-                else {
-                    strcpy(aux2->value, aux3->value);
-                    sprintf((yyval.texto), "%s = %s = %s", (yyvsp[-3].texto), (yyvsp[0].texto), aux2->value);
-                }
-            }
-        }
-        else
-            printf ("A variavel '%s' ja existe.\n", (yyvsp[-3].texto));
-    }
-#line 1602 "calc_elidian.tab.c"
-    break;
-
-  case 23: /* var: var ',' var1  */
-#line 287 "calc_elidian.y"
-                  {sprintf((yyval.texto), "%s, %s", (yyvsp[-2].texto), (yyvsp[0].texto)); }
-#line 1608 "calc_elidian.tab.c"
-    break;
-
-  case 24: /* var: var1  */
-#line 288 "calc_elidian.y"
-           {sprintf((yyval.texto), "%s", (yyvsp[0].texto)); }
-#line 1614 "calc_elidian.tab.c"
-    break;
-
-  case 25: /* var1: VAR  */
-#line 290 "calc_elidian.y"
-          {
-        VARS * aux = srch(rvar, (yyvsp[0].texto));
-        if (aux == NULL){
-            rvar = ins(rvar, (yyvsp[0].texto));
-            //sprintf($$, "%s", $1);
-        }
-        else
+            var0 = insVar(var0, (yyvsp[0].texto), (yyvsp[-2].ftype).type);
+        } else
             printf ("A variável '%s' já existe.\n", (yyvsp[0].texto));
     }
-#line 1628 "calc_elidian.tab.c"
+#line 1615 "calc_elidian.tab.c"
     break;
 
-  case 26: /* var1: VAR '=' arit  */
-#line 299 "calc_elidian.y"
-                   {
-        VARS * aux = srch(rvar, (yyvsp[-2].texto));
+  case 16: /* ivar: ivar ',' VAR '=' val  */
+#line 327 "calc_elidian.y"
+                           { 
+        VARIAVELS * aux = srchVar(var0, (yyvsp[-2].texto));
         if (aux == NULL){
-            rvar = ins(rvar, (yyvsp[-2].texto));
-            
-            VARS * aux2 = srch(rvar, (yyvsp[-2].texto));
-            if (aux2 == NULL)
-                printf ("Variavel '%s' nao foi declarada ou nao eh tipo real.\n", (yyvsp[-2].texto));
-            else {
-                aux2->value = (yyvsp[0].real);
-                //sprintf($$, "%s = %f", $1, $3);
-            }
-        }
-        else
-            printf ("A variavel '%s' ja existe.\n", (yyvsp[-2].texto));
+            var0 = insVarV(var0, (yyvsp[-2].texto), (yyvsp[-4].ftype).type, (yyvsp[0].ftype));
+        } else
+            printf ("A variável '%s' já existe.\n", (yyvsp[-2].texto));
     }
-#line 1649 "calc_elidian.tab.c"
+#line 1627 "calc_elidian.tab.c"
     break;
 
-  case 27: /* arit: SIN '(' arit ')'  */
-#line 316 "calc_elidian.y"
-                       {
-                (yyval.real) = sin((yyvsp[-1].real));
-                printf("SIN: %f = %f\n", (yyvsp[-1].real), (yyval.real));
-    }
-#line 1658 "calc_elidian.tab.c"
+  case 17: /* ivar: ivar2  */
+#line 334 "calc_elidian.y"
+            {printf("TIPO: %d\n", (yyvsp[0].ftype).type);}
+#line 1633 "calc_elidian.tab.c"
     break;
 
-  case 28: /* arit: COS '(' arit ')'  */
-#line 320 "calc_elidian.y"
-                       {
-                (yyval.real) = cos((yyvsp[-1].real));
-                printf("COS: %f = %f\n", (yyvsp[-1].real), (yyval.real));
-    }
-#line 1667 "calc_elidian.tab.c"
-    break;
-
-  case 29: /* arit: RAIZ '(' arit ')'  */
-#line 324 "calc_elidian.y"
-                        {
-                (yyval.real) = sqrt((yyvsp[-1].real));
-                printf("RAIZ: %f = %f\n", (yyvsp[-1].real), (yyval.real));
-    }
-#line 1676 "calc_elidian.tab.c"
-    break;
-
-  case 30: /* arit: '-' arit  */
-#line 328 "calc_elidian.y"
-                            {
-                (yyval.real) = -(yyvsp[0].real);
-                printf("NEG: -%f = -%f\n", (yyvsp[0].real), (yyval.real));
-    }
-#line 1685 "calc_elidian.tab.c"
-    break;
-
-  case 31: /* arit: '|' arit '|'  */
-#line 332 "calc_elidian.y"
-                   {
-                (yyval.real) = fabs((yyvsp[-1].real));
-                printf("MODULO: |%f| = %f\n", (yyvsp[-1].real), (yyval.real));
-    }
-#line 1694 "calc_elidian.tab.c"
-    break;
-
-  case 32: /* arit: arit '+' arit1  */
+  case 18: /* ivar2: TIPO VAR  */
 #line 336 "calc_elidian.y"
-                     {
-                (yyval.real) = (yyvsp[-2].real) + (yyvsp[0].real);
-                printf("SOMA: %f + %f = %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
+                { 
+        (yyval.ftype).type = typeToInt((yyvsp[-1].texto));
+        if (srchVar(var0, (yyvsp[0].texto)) == NULL){
+            var0 = insVar(var0, (yyvsp[0].texto), typeToInt((yyvsp[-1].texto)));
+            printf("TIPO VAR: %s\n", intToType(var0->type) );
+        } else
+            printf ("A variável '%s' já existe.\n", (yyvsp[0].texto));
     }
-#line 1703 "calc_elidian.tab.c"
+#line 1646 "calc_elidian.tab.c"
     break;
 
-  case 33: /* arit: arit '-' arit1  */
-#line 340 "calc_elidian.y"
-                     {
-                (yyval.real) = (yyvsp[-2].real) - (yyvsp[0].real);
-                printf("SUB: %f - %f = %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
+  case 19: /* ivar2: TIPO VAR '=' arit  */
+#line 344 "calc_elidian.y"
+                        { 
+        (yyval.ftype).type = typeToInt((yyvsp[-3].texto));
+        if (srchVar(var0, (yyvsp[-2].texto)) == NULL){
+            var0 = insVar(var0, (yyvsp[-2].texto), typeToInt((yyvsp[-3].texto)));
+            pushVarVal(var0, (yyvsp[-2].texto), (yyvsp[0].ftype));
+            printf("TIPO VAR = val: %s %s\n", (yyvsp[-3].texto), (yyvsp[-2].texto) );
+        } else
+            printf ("A variável '%s' já existe.\n", (yyvsp[-2].texto));
     }
-#line 1712 "calc_elidian.tab.c"
+#line 1660 "calc_elidian.tab.c"
     break;
 
-  case 35: /* arit1: arit1 '*' arit2  */
-#line 346 "calc_elidian.y"
-                       {
-                (yyval.real) = (yyvsp[-2].real) * (yyvsp[0].real);
-                printf("PROD: %f * %f = %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
-    }
-#line 1721 "calc_elidian.tab.c"
-    break;
-
-  case 36: /* arit1: arit1 '/' arit2  */
-#line 350 "calc_elidian.y"
-                      {
-                (yyval.real) = (yyvsp[-2].real) / (yyvsp[0].real);
-                printf("DIV: %f / %f = %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
-    }
-#line 1730 "calc_elidian.tab.c"
-    break;
-
-  case 37: /* arit1: arit1 REST arit2  */
+  case 20: /* val: TEXTO  */
 #line 354 "calc_elidian.y"
-                       {
-                (yyval.real) = remainder((yyvsp[-2].real), (yyvsp[0].real));
-                printf("RESTO: %f / %f resto %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
-    }
-#line 1739 "calc_elidian.tab.c"
+           { strcpy((yyval.ftype).t, (yyvsp[0].texto)); (yyval.ftype).type = 0;}
+#line 1666 "calc_elidian.tab.c"
     break;
 
-  case 39: /* arit2: arit3 '^' arit2  */
-#line 360 "calc_elidian.y"
-                       {
-                (yyval.real) = pow((yyvsp[-2].real), (yyvsp[0].real));
-                printf("EXPO: %f ^ %f = %f\n", (yyvsp[-2].real), (yyvsp[0].real), (yyval.real));
-    }
-#line 1748 "calc_elidian.tab.c"
+  case 21: /* val: INTEIRO  */
+#line 355 "calc_elidian.y"
+              { (yyval.ftype).i = (yyvsp[0].inteiro); (yyval.ftype).type = 1;}
+#line 1672 "calc_elidian.tab.c"
     break;
 
-  case 41: /* arit3: '(' arit ')'  */
-#line 366 "calc_elidian.y"
-                    {}
-#line 1754 "calc_elidian.tab.c"
+  case 22: /* val: REAL  */
+#line 356 "calc_elidian.y"
+           { (yyval.ftype).r = (yyvsp[0].real); (yyval.ftype).type = 2;}
+#line 1678 "calc_elidian.tab.c"
     break;
 
-  case 42: /* arit3: valor  */
-#line 367 "calc_elidian.y"
-            {(yyval.real) = (yyvsp[0].real); }
-#line 1760 "calc_elidian.tab.c"
-    break;
-
-  case 43: /* valor: INTEIRO  */
-#line 369 "calc_elidian.y"
-               { (yyval.real) = (yyvsp[0].inteiro);}
-#line 1766 "calc_elidian.tab.c"
-    break;
-
-  case 44: /* valor: REAL  */
-#line 370 "calc_elidian.y"
-           { (yyval.real) = (yyvsp[0].real);}
-#line 1772 "calc_elidian.tab.c"
-    break;
-
-  case 45: /* valor: VAR  */
-#line 371 "calc_elidian.y"
+  case 23: /* val: VAR  */
+#line 357 "calc_elidian.y"
           {
-        VARS * aux = srch(rvar, (yyvsp[0].texto));
+        VARIAVELS * aux = srchVar(var0, (yyvsp[0].texto));
         if (aux == NULL){
-            VARTS * aux2 = srcht(tvar, (yyvsp[0].texto));
-            if (aux2 == NULL){
-                printf ("Variavel '%s' nao foi declarada.\n",(yyvsp[0].texto));
-                (yyval.real) = 0;
-            }
-            else{
-                printf ("Variavel '%s' eh tipo texto.\nUtilize o modificador '&' antes das variaveis tipo texto",(yyvsp[0].texto));
-                (yyval.real) = 0;
-            }
-        }
-        else{
-            (yyval.real) = aux->value;
-            //printf("VAR->value = %f\n", $$);
+            printf ("Variavel '%s' nao declarada",(yyvsp[0].texto));    
+        } else {
+            (yyval.ftype).type = aux->type;
+            if ((yyval.ftype).type == 0)
+                    strcpy((yyval.ftype).t, aux->t);
+                else if ((yyval.ftype).type == 1)
+                    (yyval.ftype).i = aux->i;
+                    else if ((yyval.ftype).type == 2)
+                        (yyval.ftype).r = aux->r;
         }
     }
-#line 1795 "calc_elidian.tab.c"
+#line 1697 "calc_elidian.tab.c"
     break;
 
-  case 46: /* logica: L1 MAIOR L2  */
-#line 390 "calc_elidian.y"
-                    {if ((yyvsp[-2].real) > (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1801 "calc_elidian.tab.c"
+  case 24: /* arit: SIN '(' arit ')'  */
+#line 372 "calc_elidian.y"
+                       {
+                (yyval.ftype).type = 2;
+                (yyval.ftype).r = sin((yyvsp[-1].ftype).r);
+                printf("SIN: %f = %f\n", (yyvsp[-1].ftype).r, (yyval.ftype).r);
+    }
+#line 1707 "calc_elidian.tab.c"
     break;
 
-  case 47: /* logica: L1 MENOR L2  */
-#line 391 "calc_elidian.y"
-                  {if ((yyvsp[-2].real) < (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1807 "calc_elidian.tab.c"
+  case 25: /* arit: COS '(' arit ')'  */
+#line 377 "calc_elidian.y"
+                       {
+                (yyval.ftype).type = 2;
+                (yyval.ftype).r = cos((yyvsp[-1].ftype).r);
+                printf("COS: %f = %f\n", (yyvsp[-1].ftype).r, (yyval.ftype).r);
+    }
+#line 1717 "calc_elidian.tab.c"
     break;
 
-  case 48: /* logica: L1 MAI L2  */
+  case 26: /* arit: RAIZ '(' arit ')'  */
+#line 382 "calc_elidian.y"
+                        {
+                (yyval.ftype).type = 2;
+                (yyval.ftype).r = sqrt((yyvsp[-1].ftype).r);
+                printf("RAIZ: %f = %f\n", (yyvsp[-1].ftype).r, (yyval.ftype).r);
+    }
+#line 1727 "calc_elidian.tab.c"
+    break;
+
+  case 27: /* arit: '-' arit  */
+#line 387 "calc_elidian.y"
+                            {
+                (yyval.ftype).type = 2;
+                (yyval.ftype).r = -(yyvsp[0].ftype).r;
+                printf("NEG: -%f = -%f\n", (yyvsp[0].ftype).r, (yyval.ftype).r);
+    }
+#line 1737 "calc_elidian.tab.c"
+    break;
+
+  case 28: /* arit: '|' arit '|'  */
 #line 392 "calc_elidian.y"
-                {if ((yyvsp[-2].real) >= (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1813 "calc_elidian.tab.c"
-    break;
-
-  case 49: /* logica: L1 MEI L2  */
-#line 393 "calc_elidian.y"
-                {if ((yyvsp[-2].real) <= (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1819 "calc_elidian.tab.c"
-    break;
-
-  case 50: /* logica: L1 II L2  */
-#line 394 "calc_elidian.y"
-               {if ((yyvsp[-2].real) == (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1825 "calc_elidian.tab.c"
-    break;
-
-  case 51: /* logica: L1 DIF L2  */
-#line 395 "calc_elidian.y"
-                {if ((yyvsp[-2].real) != (yyvsp[0].real)) (yyval.real)=1; else (yyval.real)=0; }
-#line 1831 "calc_elidian.tab.c"
-    break;
-
-  case 52: /* L1: L2  */
-#line 397 "calc_elidian.y"
-       {(yyval.real)=(yyvsp[0].real); }
-#line 1837 "calc_elidian.tab.c"
-    break;
-
-  case 53: /* L2: '(' logica ')'  */
-#line 399 "calc_elidian.y"
-                   {(yyval.real)=(yyvsp[-1].real); }
-#line 1843 "calc_elidian.tab.c"
-    break;
-
-  case 54: /* L2: arit  */
-#line 400 "calc_elidian.y"
-           {(yyval.real)=(yyvsp[0].real); }
-#line 1849 "calc_elidian.tab.c"
-    break;
-
-  case 55: /* saida: TEXTO  */
-#line 403 "calc_elidian.y"
-             {
-        if(strcmp((yyvsp[0].texto), "")==0)
-            sprintf((yyval.texto), "");
-        else
-            sprintf((yyval.texto), "%s", (yyvsp[0].texto));
+                   {
+        (yyval.ftype).type = (yyvsp[-1].ftype).type;
+        if((yyvsp[-1].ftype).type == 1){
+            (yyval.ftype).i = fabs((yyvsp[-1].ftype).i);
+            printf("MODULO: |%d| = %d\n", (yyvsp[-1].ftype).i, (yyval.ftype).i);
+        }else if((yyvsp[-1].ftype).type == 2){
+            (yyval.ftype).r = fabs((yyvsp[-1].ftype).r);
+            printf("MODULO: |%f| = %f\n", (yyvsp[-1].ftype).r, (yyval.ftype).r);
+        }
     }
-#line 1860 "calc_elidian.tab.c"
+#line 1752 "calc_elidian.tab.c"
     break;
 
-  case 56: /* saida: TEXTO ',' saida  */
-#line 409 "calc_elidian.y"
-                      {sprintf((yyval.texto), "%s %s", (yyvsp[-2].texto), (yyvsp[0].texto)); }
-#line 1866 "calc_elidian.tab.c"
+  case 29: /* arit: arit '+' arit1  */
+#line 402 "calc_elidian.y"
+                     {
+        (yyval.ftype).type = MAX((yyvsp[-2].ftype).type, (yyvsp[0].ftype).type);
+        if((yyval.ftype).type==1){
+            (yyval.ftype).i = (yyvsp[-2].ftype).i + (yyvsp[0].ftype).i;
+            printf("SOMA 1: = %d\n", (yyval.ftype).i);
+        } else if((yyval.ftype).type==2){
+                if((yyvsp[-2].ftype).type ==1 && (yyvsp[0].ftype).type ==2)
+                    (yyval.ftype).r = (yyvsp[-2].ftype).i + (yyvsp[0].ftype).r; 
+                else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==1)
+                        (yyval.ftype).r = (yyvsp[-2].ftype).r + (yyvsp[0].ftype).i; 
+                    else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==2)
+                            (yyval.ftype).r = (yyvsp[-2].ftype).r + (yyvsp[0].ftype).r; 
+                        else
+                            printf("Variavel tipo texto\n");
+                printf("SOMA 2: = %f\n", (yyval.ftype).r);
+        }
+    }
+#line 1774 "calc_elidian.tab.c"
     break;
 
-  case 57: /* saida: arit  */
-#line 410 "calc_elidian.y"
-           {sprintf((yyval.texto), "%f", (yyvsp[0].real)); }
-#line 1872 "calc_elidian.tab.c"
+  case 30: /* arit: arit '-' arit1  */
+#line 419 "calc_elidian.y"
+                     {
+        (yyval.ftype).type = MAX((yyvsp[-2].ftype).type, (yyvsp[0].ftype).type);
+        if((yyval.ftype).type==1){
+            (yyval.ftype).i = (yyvsp[-2].ftype).i - (yyvsp[0].ftype).i;
+            printf("SUB 1: = %d\n", (yyval.ftype).i);
+        } else if((yyval.ftype).type==2){
+                if((yyvsp[-2].ftype).type ==1 && (yyvsp[0].ftype).type ==2)
+                    (yyval.ftype).r = (yyvsp[-2].ftype).i - (yyvsp[0].ftype).r; 
+                else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==1)
+                        (yyval.ftype).r = (yyvsp[-2].ftype).r - (yyvsp[0].ftype).i; 
+                    else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==2)
+                            (yyval.ftype).r = (yyvsp[-2].ftype).r - (yyvsp[0].ftype).r; 
+                        else
+                            printf("Variavel tipo texto\n");
+                printf("SUB 2: = %f\n", (yyval.ftype).r);
+        }
+    }
+#line 1796 "calc_elidian.tab.c"
     break;
 
-  case 58: /* saida: arit ',' saida  */
-#line 411 "calc_elidian.y"
-                     {sprintf((yyval.texto), "%f %s", (yyvsp[-2].real), (yyvsp[0].texto)); }
+  case 31: /* arit: arit1  */
+#line 436 "calc_elidian.y"
+            {(yyval.ftype) = (yyvsp[0].ftype);}
+#line 1802 "calc_elidian.tab.c"
+    break;
+
+  case 32: /* arit1: arit1 '*' arit2  */
+#line 438 "calc_elidian.y"
+                       {
+        (yyval.ftype).type = MAX((yyvsp[-2].ftype).type, (yyvsp[0].ftype).type);
+        if((yyval.ftype).type==1){
+            (yyval.ftype).i = (yyvsp[-2].ftype).i * (yyvsp[0].ftype).i;
+            printf("PROD 1: = %d\n", (yyval.ftype).i);
+        } else if((yyval.ftype).type==2){
+                if((yyvsp[-2].ftype).type ==1 && (yyvsp[0].ftype).type ==2)
+                    (yyval.ftype).r = (yyvsp[-2].ftype).i * (yyvsp[0].ftype).r; 
+                else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==1)
+                        (yyval.ftype).r = (yyvsp[-2].ftype).r * (yyvsp[0].ftype).i; 
+                    else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==2)
+                            (yyval.ftype).r = (yyvsp[-2].ftype).r * (yyvsp[0].ftype).r; 
+                        else
+                            printf("Variavel tipo texto\n");
+                printf("PROD 2: = %f\n", (yyval.ftype).r);
+        }
+    }
+#line 1824 "calc_elidian.tab.c"
+    break;
+
+  case 33: /* arit1: arit1 '/' arit2  */
+#line 455 "calc_elidian.y"
+                      {
+        (yyval.ftype).type = MAX((yyvsp[-2].ftype).type, (yyvsp[0].ftype).type);
+        if((yyval.ftype).type==1 && ((yyvsp[-2].ftype).i % (yyvsp[0].ftype).i)==0){
+            (yyval.ftype).i = (yyvsp[-2].ftype).i / (yyvsp[0].ftype).i;
+            printf("DIV 1: = %d\n", (yyval.ftype).i);
+        } else if((yyval.ftype).type==2 || ((yyvsp[-2].ftype).i % (yyvsp[0].ftype).i)!=0){
+                (yyval.ftype).type = 2;
+                if((yyvsp[-2].ftype).type ==1 && (yyvsp[0].ftype).type ==2){
+                    (yyval.ftype).r = (yyvsp[-2].ftype).i / (yyvsp[0].ftype).r; 
+                    printf("ops0\n");
+                } else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==1){
+                        (yyval.ftype).r = (yyvsp[-2].ftype).r / (yyvsp[0].ftype).i; 
+                            printf("ops1\n");
+                    } else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==2){
+                            (yyval.ftype).r = (yyvsp[-2].ftype).r / (yyvsp[0].ftype).r; 
+                            printf("ops2\n");
+                        } else if((yyvsp[-2].ftype).type ==1 && (yyvsp[0].ftype).type ==1){
+                                (yyval.ftype).r = (double)(yyvsp[-2].ftype).i / (yyvsp[0].ftype).i; 
+                                printf("ops3\n");
+                            } else
+                                printf("Variavel tipo texto\n");
+                printf("DIV 2: = %f\n", (yyval.ftype).r);
+            }
+    }
+#line 1853 "calc_elidian.tab.c"
+    break;
+
+  case 34: /* arit1: arit1 REST arit2  */
+#line 479 "calc_elidian.y"
+                       {
+        (yyval.ftype).type = MAX((yyvsp[-2].ftype).type, (yyvsp[0].ftype).type);
+        if((yyval.ftype).type==1){
+            (yyval.ftype).i = (yyvsp[-2].ftype).i % (yyvsp[0].ftype).i;
+            printf("REST 1: = %d\n", (yyval.ftype).i);
+        } else if((yyval.ftype).type==2){
+                if((yyvsp[-2].ftype).type ==1 && (yyvsp[0].ftype).type ==2){
+                    (yyval.ftype).r = fmod((yyvsp[-2].ftype).i, (yyvsp[0].ftype).r); 
+                    printf("ops0\n");
+                } else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==1){
+                        (yyval.ftype).r = fmod((yyvsp[-2].ftype).r, (yyvsp[0].ftype).i); 
+                        printf("ops1\n");
+                    } else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==2){
+                            (yyval.ftype).r = fmod((yyvsp[-2].ftype).r, (yyvsp[0].ftype).r); 
+                            printf("ops2\n");
+                        } else
+                                printf("Variavel tipo texto\n");
+                printf("REST 2: = %f\n", (yyval.ftype).r);
+            }
+    }
 #line 1878 "calc_elidian.tab.c"
     break;
 
-  case 59: /* saida: OPV VAR  */
-#line 412 "calc_elidian.y"
-              {
-        VARTS * aux = srcht(tvar, (yyvsp[0].texto));
+  case 35: /* arit1: arit2  */
+#line 499 "calc_elidian.y"
+            {(yyval.ftype) = (yyvsp[0].ftype);}
+#line 1884 "calc_elidian.tab.c"
+    break;
+
+  case 36: /* arit2: arit3 '^' arit2  */
+#line 501 "calc_elidian.y"
+                       {
+        (yyval.ftype).type = MAX((yyvsp[-2].ftype).type, (yyvsp[0].ftype).type);
+        if((yyval.ftype).type==1){
+            (yyval.ftype).i = pow((yyvsp[-2].ftype).i, (yyvsp[0].ftype).i);
+            printf("EXPO 1: = %d\n", (yyval.ftype).i);
+        } else if((yyval.ftype).type==2){
+                if((yyvsp[-2].ftype).type ==1 && (yyvsp[0].ftype).type ==2){
+                    (yyval.ftype).r = pow((yyvsp[-2].ftype).i, (yyvsp[0].ftype).r); 
+                    printf("ops0\n");
+                } else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==1){
+                        (yyval.ftype).r = pow((yyvsp[-2].ftype).r, (yyvsp[0].ftype).i); 
+                        printf("ops1\n");
+                    } else if((yyvsp[-2].ftype).type ==2 && (yyvsp[0].ftype).type ==2){
+                            (yyval.ftype).r = pow((yyvsp[-2].ftype).r, (yyvsp[0].ftype).r); 
+                            printf("ops2\n");
+                        } else
+                            printf("Variavel tipo texto\n");
+                printf("REST 2: = %f\n", (yyval.ftype).r);
+            }
+    }
+#line 1909 "calc_elidian.tab.c"
+    break;
+
+  case 37: /* arit2: arit3  */
+#line 521 "calc_elidian.y"
+            {(yyval.ftype) = (yyvsp[0].ftype);}
+#line 1915 "calc_elidian.tab.c"
+    break;
+
+  case 38: /* arit3: '(' arit ')'  */
+#line 523 "calc_elidian.y"
+                    {(yyval.ftype)=(yyvsp[-1].ftype);}
+#line 1921 "calc_elidian.tab.c"
+    break;
+
+  case 39: /* arit3: valor  */
+#line 524 "calc_elidian.y"
+            {(yyval.ftype)=(yyvsp[0].ftype);}
+#line 1927 "calc_elidian.tab.c"
+    break;
+
+  case 40: /* valor: INTEIRO  */
+#line 526 "calc_elidian.y"
+               {
+        (yyval.ftype).type = 1;
+        (yyval.ftype).i = (yyvsp[0].inteiro);
+    }
+#line 1936 "calc_elidian.tab.c"
+    break;
+
+  case 41: /* valor: REAL  */
+#line 530 "calc_elidian.y"
+           {
+        (yyval.ftype).type = 2;
+        (yyval.ftype).r = (yyvsp[0].real);
+    }
+#line 1945 "calc_elidian.tab.c"
+    break;
+
+  case 42: /* valor: VAR  */
+#line 534 "calc_elidian.y"
+          {
+        VARIAVELS * aux = srchVar(var0, (yyvsp[0].texto));
         if (aux == NULL){
-            VARS * aux2 = srch(rvar, (yyvsp[0].texto));
-            if (aux2 == NULL)
-                printf ("Variavel '%s' nao foi declarada.\n", (yyvsp[0].texto));
-            else{
-                sprintf((yyval.texto), "%f", aux->value);
+            printf ("ERRO: Variavel '%s' nao foi declarada.\n",(yyvsp[0].texto));
+            (yyval.ftype).r = 0;
+            (yyval.ftype).i = 0;
+            strcpy((yyval.ftype).t, "");
+        } else{
+            (yyval.ftype).type = aux->type;
+            switch(aux->type){
+                case 0: strcpy((yyval.ftype).t, aux->t); break;
+                case 1: (yyval.ftype).i = aux->i; break;
+                case 2: (yyval.ftype).r = aux->r; break;
             }
         }
-        else{
-            strcpy((yyval.texto), aux->value);
-            //printf("VAR->value = %f\n", $$);
-        }
     }
-#line 1898 "calc_elidian.tab.c"
+#line 1966 "calc_elidian.tab.c"
     break;
 
-  case 60: /* saida: OPV VAR ',' saida  */
-#line 427 "calc_elidian.y"
-                        {sprintf((yyval.texto), "%s, %s", (yyvsp[-2].texto), (yyvsp[0].texto)); }
-#line 1904 "calc_elidian.tab.c"
+  case 43: /* valor: TEXTO  */
+#line 550 "calc_elidian.y"
+            { strcpy((yyval.ftype).t, (yyvsp[0].texto)); (yyval.ftype).type = 0;}
+#line 1972 "calc_elidian.tab.c"
     break;
 
-  case 61: /* if: logica ':' cod ELSE cod ';'  */
-#line 429 "calc_elidian.y"
-                                {printf("IF ELSE CLOSE\n"); }
-#line 1910 "calc_elidian.tab.c"
+  case 44: /* logica: L1 MAIOR L2  */
+#line 552 "calc_elidian.y"
+                    {if ((yyvsp[-2].real) > (yyvsp[0].real)) (yyval.inteiro)=1; else (yyval.inteiro)=0; }
+#line 1978 "calc_elidian.tab.c"
     break;
 
-  case 62: /* if: logica ':' cod ';'  */
-#line 430 "calc_elidian.y"
-                         {printf("IF CLOSE\n"); }
-#line 1916 "calc_elidian.tab.c"
+  case 45: /* logica: L1 MENOR L2  */
+#line 553 "calc_elidian.y"
+                  {if ((yyvsp[-2].real) < (yyvsp[0].real)) (yyval.inteiro)=1; else (yyval.inteiro)=0; }
+#line 1984 "calc_elidian.tab.c"
     break;
 
-  case 63: /* for: arit ':' cod ';'  */
-#line 432 "calc_elidian.y"
-                      {printf("FOR CLOSE\n"); }
-#line 1922 "calc_elidian.tab.c"
+  case 46: /* logica: L1 MAI L2  */
+#line 554 "calc_elidian.y"
+                {if ((yyvsp[-2].real) >= (yyvsp[0].real)) (yyval.inteiro)=1; else (yyval.inteiro)=0; }
+#line 1990 "calc_elidian.tab.c"
+    break;
+
+  case 47: /* logica: L1 MEI L2  */
+#line 555 "calc_elidian.y"
+                {if ((yyvsp[-2].real) <= (yyvsp[0].real)) (yyval.inteiro)=1; else (yyval.inteiro)=0; }
+#line 1996 "calc_elidian.tab.c"
+    break;
+
+  case 48: /* logica: L1 II L2  */
+#line 556 "calc_elidian.y"
+               {if ((yyvsp[-2].real) == (yyvsp[0].real)) (yyval.inteiro)=1; else (yyval.inteiro)=0; }
+#line 2002 "calc_elidian.tab.c"
+    break;
+
+  case 49: /* logica: L1 DIF L2  */
+#line 557 "calc_elidian.y"
+                {if ((yyvsp[-2].real) != (yyvsp[0].real)) (yyval.inteiro)=1; else (yyval.inteiro)=0; }
+#line 2008 "calc_elidian.tab.c"
+    break;
+
+  case 50: /* L1: L2  */
+#line 559 "calc_elidian.y"
+       {(yyval.real)=(yyvsp[0].real); }
+#line 2014 "calc_elidian.tab.c"
+    break;
+
+  case 51: /* L2: '(' logica ')'  */
+#line 561 "calc_elidian.y"
+                   {(yyval.real)=(yyvsp[-1].inteiro); }
+#line 2020 "calc_elidian.tab.c"
+    break;
+
+  case 52: /* L2: arit  */
+#line 562 "calc_elidian.y"
+           {
+        if((yyvsp[0].ftype).type==0)
+            (yyval.real) = atof((yyvsp[0].ftype).t);
+        else if((yyvsp[0].ftype).type==1)
+                (yyval.real) = (double)(yyvsp[0].ftype).i;
+            else if((yyvsp[0].ftype).type==2)
+                    (yyval.real) = (yyvsp[0].ftype).r;
+    }
+#line 2033 "calc_elidian.tab.c"
+    break;
+
+  case 53: /* saida: arit  */
+#line 572 "calc_elidian.y"
+            {
+        if((yyvsp[0].ftype).type==0)
+            sprintf((yyval.texto), "%s", (yyvsp[0].ftype).t);
+        else if((yyvsp[0].ftype).type==1)
+                sprintf((yyval.texto), "%d", (yyvsp[0].ftype).i);
+            else if((yyvsp[0].ftype).type==2)
+                    sprintf((yyval.texto), "%f", (yyvsp[0].ftype).r);
+    }
+#line 2046 "calc_elidian.tab.c"
+    break;
+
+  case 54: /* saida: arit ',' saida  */
+#line 580 "calc_elidian.y"
+                     {
+        if((yyvsp[-2].ftype).type==0)
+            sprintf((yyval.texto), "%s %s", (yyvsp[-2].ftype).t, (yyvsp[0].texto));
+        else if((yyvsp[-2].ftype).type==1)
+                sprintf((yyval.texto), "%d %s", (yyvsp[-2].ftype).i, (yyvsp[0].texto));
+            else if((yyvsp[-2].ftype).type==2)
+                    sprintf((yyval.texto), "%f %s", (yyvsp[-2].ftype).r, (yyvsp[0].texto));
+    }
+#line 2059 "calc_elidian.tab.c"
+    break;
+
+  case 55: /* saida: logica  */
+#line 588 "calc_elidian.y"
+             {sprintf((yyval.texto), "%d", (yyvsp[0].inteiro));}
+#line 2065 "calc_elidian.tab.c"
+    break;
+
+  case 56: /* saida: logica ',' saida  */
+#line 589 "calc_elidian.y"
+                       {sprintf((yyval.texto), "%d %s", (yyvsp[-2].inteiro), (yyvsp[0].texto));}
+#line 2071 "calc_elidian.tab.c"
+    break;
+
+  case 57: /* if: IF logica ':' cod ELSE cod ';'  */
+#line 591 "calc_elidian.y"
+                                   {
+       
+    }
+#line 2079 "calc_elidian.tab.c"
+    break;
+
+  case 58: /* if: logica ':' cod ';'  */
+#line 594 "calc_elidian.y"
+                         {
+      
+    }
+#line 2087 "calc_elidian.tab.c"
+    break;
+
+  case 59: /* for: FOR arit ':' cod ';'  */
+#line 598 "calc_elidian.y"
+                          {printf("FOR CLOSE\n"); }
+#line 2093 "calc_elidian.tab.c"
     break;
 
 
-#line 1926 "calc_elidian.tab.c"
+#line 2097 "calc_elidian.tab.c"
 
       default: break;
     }
@@ -2116,15 +2287,12 @@ yyreturn:
   return yyresult;
 }
 
-#line 434 "calc_elidian.y"
+#line 601 "calc_elidian.y"
 
 
 #include "lex.yy.c"
 
 int main(){
-
-    rvar = NULL;
-    tvar = NULL;
     
     yyin=fopen("calc_exemplo.txt", "r");
     yyparse();
