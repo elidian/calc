@@ -1,8 +1,24 @@
 in
 
-  real a 
-  a = 3
+  inteiro a = 13
   real b = 7.5
-  >> a * b > b 
+  texto nome = "elidian"
+  >> a*b
+  >> b/a
+  >> "" # pular linha
+  inif (a>b) { 
+    inwhile a>b {
+      >> b
+      b = b + 1
+    }
+  } infi {
+    inwhile a<b {
+      >> a
+      a = a + 1
+    }
+  }
+  
+  >> "" # pular
+  >> nome
 
 ni

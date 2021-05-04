@@ -14,15 +14,10 @@ TEXTO \".*\"
 
 /* TIPOS DE VARIAVEIS */
 /*TIPO "inteiro"|"real"|"texto" /**/
-TIPO_REAL "rreal"
-TIPO_TEXTO "ttexto"
 
 /* TOKENS DE ENTRADA E SAIDA DE INFORMAÇÕES */
 ENTRADA "<<"
 SAIDA ">>"
-
-/* OPÇÃO CARACTERISTICA PARA VARIAVEL TIPO TEXTO */
-OPV "&"
 
 /* TOKENS DE INICIO E FIM DE PROGRAMA */
 INICIO "in"
@@ -75,13 +70,7 @@ INVALIDO .
     yylval.inteiro = 't';
     return TIPO;
 }
-{TIPO_REAL} {
-    return TIPO_REAL;
-}
-{TIPO_TEXTO} {
-    return TIPO_TEXTO;
-}
-"+"|"-"|"/"|"*"|"^" {
+"+"|"-"|"/"|"*"|"^"|"|"|"{"|"}" {
   return *yytext;
 }
 {RAIZ} {
@@ -125,9 +114,6 @@ INVALIDO .
 }
 {SAIDA} {
     return SAIDA;
-}
-{OPV} {
-    return OPV;
 }
 {INICIO} {
     return INICIO;

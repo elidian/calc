@@ -17,7 +17,7 @@ c = 8
 		}
 	}
 		WHILE(c < b){
-			c = c + 2
+			c = c + c
 			PRINT(c)
 		}
 		

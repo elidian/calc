@@ -112,7 +112,7 @@
 	}
 
     // VERIFICAR SE DADO VALOR É REAL
-    bool is_real(char test[]){
+    bool isreal(char test[]){
         int i = 0;
         int ponto = 0;
         do{
@@ -174,6 +174,12 @@
         char s[30];
         Ast *v;
     }Symasgn;
+
+    typedef struct symasgnt { /*Estrutura para um nó de atribuição. Para atrubuir o valor de v em s*/
+        int nodetype;
+        char s[30];
+        char v[100];
+    }Symasgnt;
 
     //double var[26]; /*Variáveis*/
     //int aux;
@@ -248,7 +254,7 @@
         a->r = r;
         return a;
     }
-
+    // função pra declarar variavel e atribuir
     Ast * newvar(int t, char s[], Ast *v){
         Symasgn *a = (Symasgn*)malloc(sizeof(Symasgn));
         if(!a) {
@@ -258,6 +264,18 @@
         a->nodetype = t; /*tipo i, r ou t, conforme arquivo .l*/
         strcpy(a->s, s); /*Símbolo/variável*/
         a->v = v; /*Valor*/
+        return (Ast *)a;
+    }
+    // função pra declarar variavel e atribuir valor texto
+    Ast * newvart(int t, char s[], char v[]){
+        Symasgnt *a = (Symasgnt*)malloc(sizeof(Symasgnt));
+        if(!a) {
+            printf("out of space");
+            exit(0);
+        }
+        a->nodetype = 't'; /*tipo i, r ou t, conforme arquivo .l*/
+        strcpy(a->s, s); /*Símbolo/variável*/
+        strcpy(a->v, v); /*Valor*/
         return (Ast *)a;
     }
 
@@ -270,6 +288,18 @@
         a->nodetype = '=';
         strcpy(a->s, s); /*Símbolo/variável*/
         a->v = v; /*Valor*/
+        return (Ast *)a;
+    }
+
+    Ast * newasgnt(char s[], char v[]) { /*Função para um nó de atribuição*/
+        Symasgnt *a = (Symasgnt*)malloc(sizeof(Symasgnt));
+        if(!a) {
+            printf("out of space");
+            exit(0);
+        }
+        a->nodetype = 'n';
+        strcpy(a->s, s); /*Símbolo/variável*/
+        strcpy(a->v, v); /*Valor*/
         return (Ast *)a;
     }
 
@@ -302,7 +332,14 @@
                 if (!aux){
                     VARIS * aux2 = srchi(ivar, ((Varval*)a)->var);
                     if (!aux2){
-                        printf ("306 - Variavel '%s' nao foi declarada.\n", ((Varval*)a)->var);
+                        VARTS * auxt = srcht(tvar, ((Varval*)a)->var);
+                        if (!auxt){
+                            printf ("337 - Variavel '%s' nao foi declarada.\n", ((Varval*)a)->var);
+                            v = 0.0;
+                        }
+                        else{
+                            v = atof(auxt->v);
+                        }
                     }
                     else{
                         v = (double)aux2->v;
@@ -310,6 +347,53 @@
                 }
                 else{
                     v = aux->v;
+                }
+                break;
+            case 'n':;
+                VARS * auxn = (VARS*)malloc(sizeof(VARS));
+                auxn = srch(rvar, ((Varval*)a)->var);
+                if (!auxn){
+                    VARIS * auxn2 = srchi(ivar, ((Varval*)a)->var);
+                    if (!auxn2){
+                        VARTS * auxn3 = srcht(tvar, ((Varval*)a)->var);
+                        if (!auxn3){
+                            printf ("359 - Variavel '%s' nao foi declarada.\n", ((Varval*)a)->var);
+                            v = 0.0;
+                        }
+                        else{
+                            Ast * auxnt = (Ast*)malloc(sizeof(Ast));
+                            if(!auxnt){
+                                printf("out of space");
+                                exit(0);
+                            }
+                            auxnt->nodetype = 'P';
+                            auxnt->l = newtexto(auxn3->v);
+                            eval(auxnt);
+                            v = atof(auxn3->v);
+                        }
+                    }
+                    else{
+                        Ast * auxni = (Ast*)malloc(sizeof(Ast));
+                        if(!auxni){
+                            printf("out of space");
+                            exit(0);
+                        }
+                        auxni->nodetype = 'P';
+                        auxni->l = newint(auxn2->v);
+                        eval(auxni);
+                        v = (double)auxn2->v;
+                    }
+                }
+                else{
+                    Ast * auxnr = (Ast*)malloc(sizeof(Ast));
+                    if(!auxnr){
+                        printf("out of space");
+                        exit(0);
+                    }
+                    auxnr->nodetype = 'P';
+                    auxnr->l = newreal(auxn->v);
+                    eval(auxnr);
+                    v = auxn->v;
                 }
                 break;
             case '+': v = eval(a->l) + eval(a->r); break;	/*Operações "árv esq   +   árv dir"*/
@@ -339,18 +423,17 @@
                     printf("out of space");
                     exit(0);
                 }
-                char name1[30];
-                strcpy(name1, ((Symasgn *)a)->s); /*Recupera o símbolo/variável*/
-                x = srch(rvar, name1);
+                x = srch(rvar, ((Symasgn *)a)->s);
                 if(!x){
                     VARIS * xi = (VARIS*)malloc(sizeof(VARIS));
                     if(!xi) {
                         printf("out of space");
                         exit(0);
                     }
-                    xi = srchi(ivar, name1);
+                    xi = srchi(ivar, ((Symasgn *)a)->s);
                     if(!xi){
                         printf("Erro de var nao declarada\n");
+                        v = 0.0;
                     } else
                         xi->v = (int)v; /*Atribui à variável*/
                 } else
@@ -382,48 +465,58 @@
                 
             case 'L': eval(a->l); v = eval(a->r); break; /*Lista de operções em um bloco IF/ELSE/WHILE. Assim o analisador não se perde entre os blocos*/
             
-            case 'P': v = eval(a->l);		/*Recupera um valor*/
-                    printf ("%.2f\n",v); break;  /*Função que imprime um valor*/
+            case 'P': 
+                    if(!a->l)
+                        break;
+                    //printf("P - %c\n", a->l->nodetype);
+                    if(a->l->nodetype == 'N'){
+                        a->l->nodetype = 'n';
+                        v = eval(a->l);
+                    } else {
+                        v = eval(a->l);
+                        if(a->l->nodetype != 'n' && a->l->nodetype != 'k' && a->l->nodetype != 'K' && a->l->nodetype != 'm')
+                            printf("%.2f\n", v);
+                    }
+                    if(((Intval*)a->l)->nodetype == 'k')
+                        printf ("%d\n", ((Intval*)a->l)->v);		/*Recupera um valor inteiro*/
+                    if(((Realval*)a->l)->nodetype == 'K')
+                        printf ("%.2f\n", ((Realval*)a->l)->v);		/*Recupera um valor real*/
+                    if(((Textoval*)a->l)->nodetype == 'm')
+                        printf ("%s\n", ((Textoval*)a->l)->v);		/*Recupera um valor real*/
+                    break;  /*Função que imprime um valor*/
 
             case 'i':;
-                char namei[30];
-                strcpy(namei, ((Symasgn *)a)->s);   /*Recupera e copia o símbolo/variável*/
-                ivar = insi(ivar, namei);
+                ivar = insi(ivar, ((Symasgn *)a)->s);
                 VARIS * xi = (VARIS*)malloc(sizeof(VARIS));
                 if(!xi) {
                     printf("out of space");
                     exit(0);
                 }
-                xi = srchi(ivar, namei);
+                xi = srchi(ivar, ((Symasgn *)a)->s);
                 if(((Symasgn *)a)->v)
                     xi->v = (int)eval(((Symasgn *)a)->v); /*Atribui à variável*/
-                printf("teste %d\n", xi->v);
                 break;
             case 'r':;
-                char namer[30];
-                strcpy(namer, ((Symasgn *)a)->s);   /*Recupera e copia o símbolo/variável*/
-                rvar = ins(rvar, namer);
+                rvar = ins(rvar, ((Symasgn *)a)->s);
                 VARS * xr = (VARS*)malloc(sizeof(VARS));
                 if(!xr) {
                     printf("out of space");
                     exit(0);
                 }
-                xr = srch(rvar, namer);
+                xr = srch(rvar, ((Symasgn *)a)->s);
                 if(((Symasgn *)a)->v)
                     xr->v = eval(((Symasgn *)a)->v);
                 break;
             case 't':;
-                char namet[30];
-                strcpy(namet, ((Symasgn *)a)->s);   /*Recupera e copia o símbolo/variável*/
-                tvar = inst(tvar, namet);
+                tvar = inst(tvar, ((Symasgn *)a)->s);
                 VARTS * xt = (VARTS*)malloc(sizeof(VARTS));
                 if(!xt) {
                     printf("out of space");
                     exit(0);
                 }
-                xt = srcht(tvar, namet);
-                if(((Textoval*)a)->v)
-                    strcpy(xt->v, ((Textoval*)a)->v);
+                xt = srcht(tvar, ((Symasgn *)a)->s);
+                if(!isreal(((Symasgnt *)a)->v))
+                    strcpy(xt->v, ((Symasgnt *)a)->v);
                 break;
 
             default: printf("internal error: bad node %c\n", a->nodetype);
@@ -442,8 +535,6 @@
 
 //DECLARAÇÃO DE TOKENS
 %token <inteiro> TIPO
-%token <texto> TIPO_REAL
-%token <texto> TIPO_TEXTO
 %token <inteiro> INTEIRO
 %token <real> REAL
 %token <texto> TEXTO
@@ -453,7 +544,6 @@
 %token FINAL
 %token IF ELSE FOR WHILE
 %token <texto> VAR
-%token OPV
 %token <texto> COMENTARIO
 //TOKENS DE ARITMETICA
 %token RAIZ COS SIN REST
@@ -461,9 +551,11 @@
 %token MAIOR MENOR MEI MAI II DIF OR AND
 
 //DECLARAÇÃO DE TIPO DE NÃO-TERMINAIS
-%type <a> exp arit valor logica arit1 arit2 arit3 L1 L2 list
+%type <a> logica L1 L2
+%type <a> exp arit valor arit1 arit2 arit3 list
 
 //DECLARAÇÃO DE PRECEDÊNCIA
+//%right MAIOR MENOR MEI MAI II DIF OR AND
 %right '='
 %left '+' '-'
 %left '*' '/'
@@ -471,7 +563,7 @@
 %left ')'
 %right '('
 
-%nonassoc '|' IMUNUS VAR
+%nonassoc IMUNUS VAR IFX
 
 %start prog
 %%
@@ -481,39 +573,34 @@ prog: INICIO cod FINAL {printf("\nPROGRAMA FINALIZADO\n\n");}
 cod: cod exp {eval($2);}
     | 
     ;
-exp: VAR '=' arit {$$ = newasgn($1, $3);}
+exp: VAR '=' logica {$$ = newasgn($1, $3);}
     | VAR '=' TEXTO {
-        Textoval * tv = (Textoval*)malloc(sizeof(Textoval));
+        Symasgnt * tv = (Symasgnt*)malloc(sizeof(Symasgnt));
         strcpy(tv->v, $3);
         $$ = newasgn($1, (Ast*)tv);
     }
     | TIPO VAR {$$ = newvar($1, $2, NULL);}
-    | TIPO VAR '=' arit {$$ = newvar($1, $2, $4);}
-    | TIPO VAR '=' TEXTO {
-        Textoval * tv = (Textoval*)malloc(sizeof(Textoval));
-        strcpy(tv->v, $4);
-        $$ = newvar($1, $2, (Ast*)tv);
-    }
+    | TIPO VAR '=' logica {$$ = newvar($1, $2, $4);}
+    | TIPO VAR '=' TEXTO {$$ = newvart($1, $2, $4);}
     | VAR ENTRADA {}
-    | ':' arit {$$ = $2;}
+    //| ':' arit {$$ = $2;}
     | ':' logica {$$ = $2;}
-    | IF '(' logica ')' '{' list '}'  {$$ = newflow('I', $3, $6, NULL);}
-	| IF '(' logica ')' '{' list '}' ELSE '{' list '}' {$$ = newflow('I', $3, $6, $10);}
-	| WHILE '(' logica ')' '{' list '}' {$$ = newflow('W', $3, $6, NULL);}
-    | FOR { printf("FOR\n");}
-    | COMENTARIO {
-        printf("COMENTARIO: %s\n", $1);
-    }
-    | SAIDA arit { $$ = newast('P', $2,NULL);}
+    | IF logica '{' list '}' %prec IFX {$$ = newflow('I', $2, $4, NULL);}
+	| IF logica '{' list '}' ELSE '{' list '}' {$$ = newflow('I', $2, $4, $8);}
+	| WHILE logica '{' list '}' {$$ = newflow('W', $2, $4, NULL);}
+    | FOR logica ':' logica ':' logica '{' list '}' { printf("FOR\n"); $$ = newflow('w', $2, $4, $6);}
+    | COMENTARIO {$$ = newast('P', NULL, NULL);}
+    //| SAIDA arit { $$ = newast('P', $2,NULL);}
     | SAIDA logica { $$ = newast('P', $2,NULL);}
     | SAIDA TEXTO {
         Textoval * tv = (Textoval*)malloc(sizeof(Textoval));
+        tv->nodetype = 'm';
         strcpy(tv->v, $2);
-        $$ = newast('P', (Ast*)tv,NULL);
+        $$ = newast('P', (Ast*)tv, NULL);
     }
     ;
 
-list: exp{$$ = $1;}
+list: exp {$$ = $1;}
     | list exp { $$ = newast('L', $1, $2);}
     ;
 arit: SIN '(' arit ')' {$$ = newast('S',$3,NULL);}
@@ -523,22 +610,23 @@ arit: SIN '(' arit ')' {$$ = newast('S',$3,NULL);}
     | '|' arit '|' {$$ = newast('A',$2,NULL);}
     | arit '+' arit1 {$$ = newast('+',$1,$3);}
     | arit '-' arit1 {$$ = newast('-',$1,$3);}
-    | arit1
+    | arit1 {$$=$1;}
     ;
 arit1: arit1 '*' arit2 {$$ = newast('*',$1,$3);}
     | arit1 '/' arit2 {$$ = newast('/',$1,$3);}
     | arit1 REST arit2 {$$ = newast('%',$1,$3);}
-    | arit2
+    | arit2 {$$=$1;}
     ;
 arit2: arit3 '^' arit2 {$$ = newast('^',$1,$3);}
-    | arit3
+    | arit3 {$$=$1;}
     ;
-arit3: '(' arit ')' {$$ = $2;}
-    | valor {$$ = $1;}
+arit3: //'(' arit ')' {$$ = $2;}
+     valor {$$ = $1;}
     ;
-valor: INTEIRO {$$ = newint($1);}
-    | REAL {$$ = newreal($1);}
-    | VAR {$$ = newValorVal($1);}
+valor: INTEIRO {$$ = newint($1);}    // codigo 'k'
+    | REAL {$$ = newreal($1);}      // codigo 'K'
+    //| TEXTO {$$ = newtexto($1);}    // codigo 'm'
+    | VAR {$$ = newValorVal($1);}   // codigo 'N'
     ;
 logica: L1 MAIOR L2 {$$ = newcmp(1,$1,$3);}
     | L1 MENOR L2 {$$ = newcmp(2,$1,$3);}
@@ -548,10 +636,11 @@ logica: L1 MAIOR L2 {$$ = newcmp(1,$1,$3);}
     | L1 MEI L2 {$$ = newcmp(6,$1,$3);}
     | L1 OR L2 {$$ = newcmp(7,$1,$3);}
     | L1 AND L2 {$$ = newcmp(8,$1,$3);}
+    | L1 {$$ = $1;}
     ;
-L1: L2 {$$=$1; }
+L1: L2 {$$=$1;}
     ;
-L2: '(' logica ')' {$$=$2;}
+L2:  '(' logica ')' {$$ = $2;}
     | arit {$$=$1;}
     ;
 %%
