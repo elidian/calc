@@ -47,7 +47,7 @@ OR "||"
 AND "&&"
 
 /* PADRÃO PARA NOME DE VARIAVEIS */
-VAR {LETRA}({LETRA}|{NUMERO}|"-"|"_")*
+VAR {LETRA}({LETRA}|{NUMERO}|"_")*
 
 /* TOKEN PARA COMENTÁRIO */
 COMENTARIO "#".*
@@ -70,8 +70,11 @@ INVALIDO .
     yylval.inteiro = 't';
     return TIPO;
 }
-"+"|"-"|"/"|"*"|"^"|"|"|"{"|"}" {
+"+"|"-"|"/"|"*"|"^"|"|" {
   return *yytext;
+}
+[=:;,(){}] {
+    return yytext[0];
 }
 {RAIZ} {
     return RAIZ;
@@ -156,9 +159,6 @@ INVALIDO .
 {COMENTARIO} {
     strcpy(yylval.texto, yytext);
     return COMENTARIO;
-}
-[=:;,()] {
-    return yytext[0];
 }
 [\n] {
     /* CONTADOR PARA SALTO DE LINHAS */

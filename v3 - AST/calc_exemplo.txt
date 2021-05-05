@@ -17,7 +17,11 @@ in
       a = a + 1
     }
   }
-  
+  >> "" #pular linha
+  infor real x=0:x<b:x=x+1 {
+    >> x
+  }
+
   >> "" # pular
   >> nome
 
