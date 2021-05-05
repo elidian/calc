@@ -3,6 +3,8 @@ in
   inteiro a = 13
   real b = 7.5
   texto nome = "elidian"
+  >> nome
+  nome = "alencar"
   >> a*b
   >> b/a
   >> "" # pular linha

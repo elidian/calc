@@ -295,18 +295,6 @@
         a->v = v; /*Valor*/
         return (Ast *)a;
     }
-    // função pra declarar variavel e atribuir valor texto
-    Ast * newvart(int t, char s[], char v[]){
-        Symasgnt *a = (Symasgnt*)malloc(sizeof(Symasgnt));
-        if(!a) {
-            printf("out of space");
-            exit(0);
-        }
-        a->nodetype = 't'; /*tipo i, r ou t, conforme arquivo .l*/
-        strcpy(a->s, s); /*Símbolo/variável*/
-        strcpy(a->v, v); /*Valor*/
-        return (Ast *)a;
-    }
 
     Ast * newasgn(char s[], Ast *v) { /*Função para um nó de atribuição*/
         Symasgn *a = (Symasgn*)malloc(sizeof(Symasgn));
@@ -332,8 +320,7 @@
         return (Ast *)a;
     }
 
-    Ast * newValorVal(char s[]) { /*Função que recupera o nome/referência de uma variável, neste caso o número*/
-        
+    Ast * newValorVal(char s[]) { /*Função que recupera o nome/referência de uma variável, neste caso o número*/    
         Varval *a = (Varval*) malloc(sizeof(Varval));
         if(!a) {
             printf("out of space");
@@ -342,7 +329,6 @@
         a->nodetype = 'N';
         strcpy(a->var, s);
         return (Ast*)a;
-        
     }
 
     double eval(Ast *a) { /*Função que executa operações a partir de um nó*/
@@ -461,8 +447,17 @@
                     }
                     xi = srchi(ivar, ((Symasgn *)a)->s);
                     if(!xi){
-                        printf("Erro de var nao declarada\n");
-                        v = 0.0;
+                        VARST * xt = (VARST*)malloc(sizeof(VARST));
+                        if(!xt) {
+                            printf("out of space");
+                            exit(0);
+                        }
+                        xt = srcht(tvar, ((Symasgn *)a)->s);
+                        if(!xt){
+                            printf("Erro de var nao declarada\n");
+                            v = 0.0;
+                        } else
+                            strcpy(xt->v, ((Textoval*)((Symasgn *)a)->v)->v); /*Atribui à variável*/
                     } else
                         xi->v = (int)v; /*Atribui à variável*/
                 } else
@@ -520,9 +515,9 @@
                     }
                     if(((Intval*)a->l)->nodetype == 'k')
                         printf ("%d\n", ((Intval*)a->l)->v);		/*Recupera um valor inteiro*/
-                    if(((Realval*)a->l)->nodetype == 'K')
+                    else if(((Realval*)a->l)->nodetype == 'K')
                         printf ("%.2f\n", ((Realval*)a->l)->v);		/*Recupera um valor real*/
-                    if(((Textoval*)a->l)->nodetype == 'm')
+                    else if(((Textoval*)a->l)->nodetype == 'm')
                         printf ("%s\n", ((Textoval*)a->l)->v);		/*Recupera um valor real*/
                     break;  /*Função que imprime um valor*/
 
@@ -559,8 +554,8 @@
                     exit(0);
                 }
                 xt = srcht(tvar, ((Symasgn *)a)->s);
-                if(!isreal(((Symasgnt *)a)->v))
-                    strcpy(xt->v, ((Symasgnt *)a)->v);
+                if((((Symasgn *)a)->v))
+                    strcpy(xt->v, ((Textoval*)((Symasgn*)a)->v)->v);
                 break;
 
             
@@ -659,35 +654,19 @@ atrib: VAR '=' logica {$$ = newasgn($1, $3);}
     | TIPO VAR '=' logica {$$ = newvar($1, $2, $4);}
     ;
 exp: atrib {$$ = $1;}
-    | VAR '=' TEXTO {
-        Symasgnt * tv = (Symasgnt*)malloc(sizeof(Symasgnt));
-        strcpy(tv->v, $3);
-        $$ = newasgn($1, (Ast*)tv);
-    } 
+    | VAR '=' TEXTO {$$ = newasgn($1, newtexto($3));} 
     | TIPO VAR {$$ = newvar($1, $2, NULL);}
-    | TIPO VAR '=' TEXTO {$$ = newvart($1, $2, $4);}
-    | VAR ENTRADA {
-        Varval * var = (Varval*)malloc(sizeof(Varval));
-        strcpy(var->var, $1);
-        $$ = newast('c', (Ast*)var, NULL);
-    }
-    //| ':' arit {$$ = $2;}
-    | ':' logica {$$ = $2;}
+    | TIPO VAR '=' TEXTO {$$ = newvar($1, $2, newtexto($4));}
+    | VAR ENTRADA {$$ = newast('c', newValorVal($1), NULL);}
     | IF logica '{' list '}' %prec IFX {$$ = newflow('I', $2, $4, NULL);}
 	| IF logica '{' list '}' ELSE '{' list '}' {$$ = newflow('I', $2, $4, $8);}
 	| WHILE logica '{' list '}' {$$ = newflow('W', $2, $4, NULL);}
     | FOR atrib ':' logica ':' atrib '{' list '}' {$$ = newflowfor('F', $2, $4, $6, $8, NULL);}
     | COMENTARIO {$$ = newast('P', NULL, NULL);}
-    //| SAIDA arit { $$ = newast('P', $2,NULL);}
     | SAIDA logica { $$ = newast('P', $2,NULL);}
-    | SAIDA TEXTO {
-        Textoval * tv = (Textoval*)malloc(sizeof(Textoval));
-        tv->nodetype = 'm';
-        strcpy(tv->v, $2);
-        $$ = newast('P', (Ast*)tv, NULL);
-    }
+    | SAIDA TEXTO {$$ = newast('P', newtexto($2), NULL);}
+    | ':' logica {$$ = $2;}
     ;
-
 list: exp {$$ = $1;}
     | list exp { $$ = newast('L', $1, $2);}
     ;
