@@ -11,31 +11,33 @@
     int yylex();
     void yyerror(char *s){ printf("\nERROR (%s) na linha %d\n", s, yylineno); }
 
+    #define name_size 50
+    #define string_size 1000
     
     typedef struct variavels {
-		char name[50];
+		char name[name_size];
         int type; // string se 0, int se 1, double se 2
-        char tv[100];
+        char tv[string_size];
         int iv;
         double rv;
 		struct variavels * prox;
 	} VARIAVELS;
 
     typedef struct varsi {
-		char name[30];
+		char name[name_size];
         int v;
 		struct varsi * prox;
 	} VARSI;
 
     typedef struct vars {
-		char name[30];
+		char name[name_size];
         double v;
 		struct vars * prox;
 	} VARS;
 
     typedef struct varst {
-		char name[30];
-		char v[100];
+		char name[name_size];
+		char v[string_size];
 		struct varst * prox;
 	} VARST;
 
@@ -154,12 +156,12 @@
 
     typedef struct textoval { /*Estrutura de um número*/
         int nodetype;
-        char v[100];
+        char v[string_size];
     }Textoval;
 
     typedef struct varval { /*Estrutura de um nome de variável, nesse exemplo uma variável é um número no vetor var[26]*/
         int nodetype;
-        char var[30];
+        char var[name_size];
     }Varval;
 
     typedef struct flow { /*Estrutura de um desvio (if/else/while)*/
@@ -171,14 +173,14 @@
 
     typedef struct symasgn { /*Estrutura para um nó de atribuição. Para atrubuir o valor de v em s*/
         int nodetype;
-        char s[30];
+        char s[name_size];
         Ast *v;
     }Symasgn;
 
     typedef struct symasgnt { /*Estrutura para um nó de atribuição. Para atrubuir o valor de v em s*/
         int nodetype;
-        char s[30];
-        char v[100];
+        char s[name_size];
+        char v[string_size];
     }Symasgnt;
 
     //double var[26]; /*Variáveis*/
@@ -489,12 +491,42 @@
             /*CASO FOR*/
             case 'F':
                 v = 0.0;
+                /*
                 if( ((Flow *)a)->tl ) {
                     for(eval(((Flowfor*)((Flow *)a)->cond)->v1); 
                         eval(((Flowfor*)((Flow *)a)->cond)->v2); 
                         eval(((Flowfor*)((Flow *)a)->cond)->v3)
                         ){
                             v =  eval(((Flow *)a)->tl);
+                    }
+                }//*/
+                if( ((Flow *)a)->tl ){
+                    char name[name_size];
+                    if(((Symasgn*)((Flowfor*)((Flow *)a)->cond)->v1)->s){
+                        strcpy(name, ((Symasgn*)((Flowfor*)((Flow *)a)->cond)->v1)->s);
+                    }
+                    if(((Flowfor*)((Flow *)a)->cond)->v1)
+                        v = eval(((Flowfor*)((Flow *)a)->cond)->v1);
+                    VARS* auxrf = srch(rvar, name);
+                    if(auxrf){
+                        for(auxrf->v; 
+                            eval(((Flowfor*)((Flow *)a)->cond)->v2); 
+                            auxrf->v += eval(((Flowfor*)((Flow *)a)->cond)->v3)
+                            ){
+                                v =  eval(((Flow *)a)->tl);
+                        }
+                    } else {
+                        VARSI* auxif = srchi(ivar, name);
+                        if(auxif){
+                            for(auxif->v; 
+                                eval(((Flowfor*)((Flow *)a)->cond)->v2); 
+                                auxif->v += eval(((Flowfor*)((Flow *)a)->cond)->v3)
+                                ){
+                                    v =  eval(((Flow *)a)->tl);
+                            }
+                        } else {
+                            printf("Erro no FOR: variavel nao numerica\n");
+                        }
                     }
                 }
             break;
@@ -661,7 +693,7 @@ exp: atrib {$$ = $1;}
     | IF logica '{' list '}' %prec IFX {$$ = newflow('I', $2, $4, NULL);}
 	| IF logica '{' list '}' ELSE '{' list '}' {$$ = newflow('I', $2, $4, $8);}
 	| WHILE logica '{' list '}' {$$ = newflow('W', $2, $4, NULL);}
-    | FOR atrib ':' logica ':' atrib '{' list '}' {$$ = newflowfor('F', $2, $4, $6, $8, NULL);}
+    | FOR atrib ':' logica ':' arit '{' list '}' {$$ = newflowfor('F', $2, $4, $6, $8, NULL);}
     | COMENTARIO {$$ = newast('P', NULL, NULL);}
     | SAIDA logica { $$ = newast('P', $2,NULL);}
     | SAIDA TEXTO {$$ = newast('P', newtexto($2), NULL);}

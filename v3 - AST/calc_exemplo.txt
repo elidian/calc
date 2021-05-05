@@ -8,19 +8,15 @@ in
   >> a*b
   >> b/a
   >> "" # pular linha
-  inif (a>b) { 
-    inwhile a>b {
-      >> b
-      b = b + 1
-    }
-  } infi {
-    inwhile a<b {
-      >> a
-      a = a + 1
-    }
+  a = 0
+  inwhile a<=10-a {
+    >> a
+    a = a + 1
   }
   >> "" #pular linha
-  infor real x=0:x<b:x=x+1 {
+  b = 15
+  inteiro x = 2
+  infor x=2:x<=10-x:1 {
     >> x
   }
 
