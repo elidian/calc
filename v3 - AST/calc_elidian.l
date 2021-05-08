@@ -10,7 +10,7 @@ LETRA [a-zA-Z]
 /* TIPOS PRIMITIVOS */
 INTEIRO {NUMERO}+
 REAL {NUMERO}*"."{NUMERO}+
-TEXTO \".*\"
+TEXTO \"[^\"]*\"|\'[^"]*\'
 
 /* TIPOS DE VARIAVEIS */
 /*TIPO "inteiro"|"real"|"texto" /**/
@@ -34,6 +34,8 @@ REST "%"
 SIN "sin"
 COS "cos"
 RAIZ "raiz"
+PLUS "++"
+LESS "--"
 
 /* LOGICA {MENOR}|{MAIOR}|{MEI}|{MAI}|{II}|{DIF} */
 MAIOR ">"
@@ -70,10 +72,17 @@ INVALIDO .
     yylval.inteiro = 't';
     return TIPO;
 }
+{PLUS} {
+    return PLUS;
+}
+{LESS} {
+    return LESS;
+}
 "+"|"-"|"/"|"*"|"^"|"|" {
   return *yytext;
 }
-[=:;,(){}] {
+
+[=:;,(){}?] {
     return yytext[0];
 }
 {RAIZ} {

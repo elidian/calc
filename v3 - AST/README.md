@@ -197,7 +197,7 @@ Saída:
 #### FOR
 Estrutura:
 ```
-infor atribuição : logica : aritimetica
+infor atribuição : logica : aritmetica
 {
   # lista de codigos caso teste FOR POSITIVO
 }
