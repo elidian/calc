@@ -1,44 +1,12 @@
 in
 
-  inteiro a = 13
-  real b = 7.5
-  texto nome = "elidian"
-  >> nome
-  nome = "alencar"
-  >> a*b
-  >> b/a
-  >> "" # pular linha
-  a = 0
-  >> "teste inwhile"
-  inwhile a<=10-a {
-    >> a
-    a = a + 1
+  inteiro base = 5, altura = 9, result, area = base * altura
+  area
+  inif area < 50 {
+    >> area, ' eh menor que ', 50
+  } infi {
+    result = area / 2
+    >> "area / 2 = ", result
   }
-  >> "" #pular linha
-  b = 15
-  inteiro x = 2
-  >> "teste infor"
-  infor x=2:x<=10-x:1 {
-    >> x
-  }
-  >> ""
-  >> "teste ITERATOR"
-  >> "10 > 5"
-  10>5?>>"sim":>>"nao"
-  >> ""
-  >> "teste incremento e decremento"
-  >> "valor de x"
-  x
-  >> "valor de x + 1"
-  >> x++
-  >> x
-  >> x--
-  x
-  2 + x-- -1
-  x
-  >> "" # pular
-  >> nome
-  real x = 33
-  x
 
 ni
