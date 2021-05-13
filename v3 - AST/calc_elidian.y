@@ -13,7 +13,7 @@
 
     #define name_size 30
     #define string_size 1000
-    
+
     typedef struct variavels {
 		char name[name_size];
         int type; // string se 0, int se 1, double se 2
@@ -469,7 +469,7 @@
                             }
                             auxnt->nodetype = 'P';
                             auxnt->l = newtexto(auxn3->v);
-                            auxnt->r = NULL;
+                            auxnt->r = newast('P', NULL, NULL);
                             eval(auxnt);
                             v = atof(auxn3->v);
                         }
@@ -482,7 +482,7 @@
                         }
                         auxni->nodetype = 'P';
                         auxni->l = newint(auxn2->v);
-                        auxni->r = NULL;
+                        auxni->r = newast('P', NULL, NULL);
                         eval(auxni);
                         v = (double)auxn2->v;
                     }
@@ -495,59 +495,9 @@
                     }
                     auxnr->nodetype = 'P';
                     auxnr->l = newreal(auxn->v);
-                    auxnr->r = NULL;
+                    auxnr->r = newast('P', NULL, NULL);
                     eval(auxnr);
                     v = auxn->v;
-                }
-                break;
-            case 'u':;
-                VARS * auxu = (VARS*)malloc(sizeof(VARS));
-                auxu = srch(rvar, ((Varval*)a)->var);
-                if (!auxu){
-                    VARSI * auxu2 = srchi(ivar, ((Varval*)a)->var);
-                    if (!auxu2){
-                        VARST * auxu3 = srcht(tvar, ((Varval*)a)->var);
-                        if (!auxu3){
-                            printf ("507 - Variavel '%s' nao foi declarada.\n", ((Varval*)a)->var);
-                            v = 0.0;
-                        }
-                        else{
-                            Ast * auxut = (Ast*)malloc(sizeof(Ast));
-                            if(!auxut){
-                                printf("out of space");
-                                exit(0);
-                            }
-                            auxut->nodetype = 'p';
-                            auxut->l = newtexto(auxu3->v);
-                            auxut->r = NULL;
-                            eval(auxut);
-                            v = atof(auxu3->v);
-                        }
-                    }
-                    else{
-                        Ast * auxui = (Ast*)malloc(sizeof(Ast));
-                        if(!auxui){
-                            printf("out of space");
-                            exit(0);
-                        }
-                        auxui->nodetype = 'p';
-                        auxui->l = newint(auxu2->v);
-                        auxui->r = NULL;
-                        eval(auxui);
-                        v = (double)auxu2->v;
-                    }
-                }
-                else{
-                    Ast * auxur = (Ast*)malloc(sizeof(Ast));
-                    if(!auxur){
-                        printf("out of space");
-                        exit(0);
-                    }
-                    auxur->nodetype = 'p';
-                    auxur->l = newreal(auxu->v);
-                    auxur->r = NULL;
-                    eval(auxur);
-                    v = auxu->v;
                 }
                 break;
 
@@ -692,7 +642,7 @@
             case 'L': eval(a->l); v = eval(a->r); break; /*Lista de operções em um bloco IF/ELSE/WHILE. Assim o analisador não se perde entre os blocos*/
             case 'l': v = eval(a->l); eval(a->r); break;
             // print na tela
-            case 'P': 
+            case 'P':;
                     //printf("P1\n");
                     if(!a->l)
                         break;
@@ -706,60 +656,25 @@
                         v = eval(a->l);
                         if(a->l->nodetype != 'n' && a->l->nodetype != 'k' && a->l->nodetype != 'K' && a->l->nodetype != 'm'){
                             
-                            printf("%.2f\n", v);
-                        }
-                    }
-                    //printf("P4\n");
-                    if(((Intval*)a->l)->nodetype == 'k')
-                        printf ("%d\n", ((Intval*)a->l)->v);		/*Recupera um valor inteiro*/
-                    else if(((Realval*)a->l)->nodetype == 'K')
-                        printf ("%.2f\n", ((Realval*)a->l)->v);		/*Recupera um valor real*/
-                    else if(((Textoval*)a->l)->nodetype == 'm')
-                        printf ("%s\n", ((Textoval*)a->l)->v);		/*Recupera um valor real*/
-                    //printf("P5\n");
-                    if(!a->r)
-                        break;
-                    else{
-                        //printf("P6\n");
-                        //printf("a->r->nodetype: %c\n", a->r->nodetype);
-                        eval(a->r);
-                    }
-                    //printf("P7\n");
-                    break;  /*Função que imprime um valor*/
-            case 'p': 
-                    //printf("pp1\n");
-                    if(!a->l)
-                        break;
-                    //printf("P - %c\n", a->l->nodetype);
-                    if(a->l->nodetype == 'N'){
-                        //printf("pp2\n");
-                        a->l->nodetype = 'u';
-                        v = eval(a->l);
-                    } else {
-                        //printf("pp3\n");
-                        v = eval(a->l);
-                        if(a->l->nodetype != 'n' && a->l->nodetype != 'k' && a->l->nodetype != 'K' && a->l->nodetype != 'm'){    
                             printf("%.2f", v);
                         }
                     }
-                    //printf("pp4\n");
+                    //printf("P4\n");
                     if(((Intval*)a->l)->nodetype == 'k')
                         printf ("%d", ((Intval*)a->l)->v);		/*Recupera um valor inteiro*/
                     else if(((Realval*)a->l)->nodetype == 'K')
                         printf ("%.2f", ((Realval*)a->l)->v);		/*Recupera um valor real*/
                     else if(((Textoval*)a->l)->nodetype == 'm')
                         printf ("%s", ((Textoval*)a->l)->v);		/*Recupera um valor real*/
-                    //printf("pp5\n");
+                    //printf("P5\n");
                     if(!a->r)
-                        break;
+                        printf("\n");
                     else{
-                        //printf("pp6\n");
-                        //printf("a->r->nodetype: %c\n", a->r->nodetype);
                         eval(a->r);
                     }
-                    //printf("pp7\n");
+                    //printf("P7\n");
                     break;  /*Função que imprime um valor*/
-
+            
             // declarar variavel inteiro
             case 'i':;
                 if(((Symasgn *)a)->n)
@@ -971,11 +886,11 @@ exp: declmult {$$ = $1;}
     // >> 'autor: ', nome , 'valor: ' , x
     // SAIDA saida( texto , saida( logica, saida( texto, saida( logica ) ) ) )
 saida: logica { $$ = newast('P', $1, NULL);}
-    | logica ',' saida { $$ = newast('p', $1, $3);}
+    | logica ',' saida { $$ = newast('P', $1, $3);}
     | TEXTO {$$ = newast('P', newtexto($1), NULL);}
-    | TEXTO ',' saida {$$ = newast('p', newtexto($1), $3);}
+    | TEXTO ',' saida {$$ = newast('P', newtexto($1), $3);}
     | incdec { $$ = newast('P', $1, NULL);}
-    | incdec ',' saida { $$ = newast('p', $1, $3);}
+    | incdec ',' saida { $$ = newast('P', $1, $3);}
     ;
 incdec: VAR PLUS %prec PLUS2 {$$ = newasgn($1, newast('+',newValorVal($1),newint(1)));}
     | VAR LESS %prec LESS2 {$$ = newasgn($1, newast('-',newValorVal($1),newint(1)));}
