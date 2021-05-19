@@ -414,9 +414,29 @@
         if(teste)
             printf("%s[%d] = %d\n", name, i, a->v);
         else
-            printf("Erro(vetor): posicao fora do vetor\n");
+            printf("Erro (printvecp()): posicao fora do vetor\n");
     }
 
+    void * printValorVar(char *var){
+        //printf("VAR %s\n", var);
+        VARS * auxr = srch(rvar, var);
+        if (auxr){
+            printf("%f", auxr->v);
+        } else {
+            VARSI * auxi = srchi(ivar, var);
+            if (auxi){
+                printf("%d", auxi->v);
+            } else {
+                VARST * auxt = srcht(tvar, var);
+                if (auxt){
+                    printf("%s", auxt->v);
+                }
+                else{
+                    printf ("Erro (printValorVar()) - Variavel '%s' nao foi declarada.\n", var);
+                }
+            }
+        }
+    }
 
     double eval(Ast *a) { /*Função que executa operações a partir de um nó*/
         double v;
@@ -448,56 +468,6 @@
                 }
                 else{
                     v = aux->v;
-                }
-                break;
-            case 'n':;
-                VARS * auxn = (VARS*)malloc(sizeof(VARS));
-                auxn = srch(rvar, ((Varval*)a)->var);
-                if (!auxn){
-                    VARSI * auxn2 = srchi(ivar, ((Varval*)a)->var);
-                    if (!auxn2){
-                        VARST * auxn3 = srcht(tvar, ((Varval*)a)->var);
-                        if (!auxn3){
-                            printf ("460 - Variavel '%s' nao foi declarada.\n", ((Varval*)a)->var);
-                            v = 0.0;
-                        }
-                        else{
-                            Ast * auxnt = (Ast*)malloc(sizeof(Ast));
-                            if(!auxnt){
-                                printf("out of space");
-                                exit(0);
-                            }
-                            auxnt->nodetype = 'P';
-                            auxnt->l = newtexto(auxn3->v);
-                            auxnt->r = newast('P', NULL, NULL);
-                            eval(auxnt);
-                            v = atof(auxn3->v);
-                        }
-                    }
-                    else{
-                        Ast * auxni = (Ast*)malloc(sizeof(Ast));
-                        if(!auxni){
-                            printf("out of space");
-                            exit(0);
-                        }
-                        auxni->nodetype = 'P';
-                        auxni->l = newint(auxn2->v);
-                        auxni->r = newast('P', NULL, NULL);
-                        eval(auxni);
-                        v = (double)auxn2->v;
-                    }
-                }
-                else{
-                    Ast * auxnr = (Ast*)malloc(sizeof(Ast));
-                    if(!auxnr){
-                        printf("out of space");
-                        exit(0);
-                    }
-                    auxnr->nodetype = 'P';
-                    auxnr->l = newreal(auxn->v);
-                    auxnr->r = newast('P', NULL, NULL);
-                    eval(auxnr);
-                    v = auxn->v;
                 }
                 break;
 
@@ -643,29 +613,29 @@
             case 'l': v = eval(a->l); eval(a->r); break;
             // print na tela
             case 'P':;
-                    //printf("P1\n");
-                    if(!a->l)
-                        break;
-                    //printf("P - %c\n", a->l->nodetype);
-                    if(a->l->nodetype == 'N'){
-                        a->l->nodetype = 'n';
-                        //printf("P2\n");
-                        v = eval(a->l);
-                    } else {
-                        //printf("P3\n");
-                        v = eval(a->l);
-                        if(a->l->nodetype != 'n' && a->l->nodetype != 'k' && a->l->nodetype != 'K' && a->l->nodetype != 'm'){
-                            
-                            printf("%.2f", v);
-                        }
-                    }
-                    //printf("P4\n");
-                    if(((Intval*)a->l)->nodetype == 'k')
-                        printf ("%d", ((Intval*)a->l)->v);		/*Recupera um valor inteiro*/
-                    else if(((Realval*)a->l)->nodetype == 'K')
-                        printf ("%.2f", ((Realval*)a->l)->v);		/*Recupera um valor real*/
-                    else if(((Textoval*)a->l)->nodetype == 'm')
-                        printf ("%s", ((Textoval*)a->l)->v);		/*Recupera um valor real*/
+                //printf("P1\n");
+                if(!a->l) {
+                    if(!a->r)
+                        printf("\n");
+                    break;
+                }
+                //printf("P - %c\n", a->l->nodetype);
+                if(a->l->nodetype == 'N') {
+                    //a->l->nodetype = 'n';
+                    printValorVar(((Varval*)a->l)->var);
+                    //printf("nodetype 'NN'\n");
+                }
+                else if(((Intval*)a->l)->nodetype == 'k')
+                    printf ("%d", ((Intval*)a->l)->v);		/*Recupera um valor inteiro*/
+                else if(((Realval*)a->l)->nodetype == 'K')
+                    printf ("%.2f", ((Realval*)a->l)->v);		/*Recupera um valor real*/
+                else if(((Textoval*)a->l)->nodetype == 'm') {
+                    printf ("%s", ((Textoval*)a->l)->v);		/*Recupera um valor texto*/
+                } else {
+                    //printf("not 'NN'\n");
+                    v = eval(a->l);
+                    printf("%.2f", v);
+                }
                     //printf("P5\n");
                     if(!a->r)
                         printf("\n");
@@ -775,6 +745,10 @@
                     }
                 }
                 break;
+            
+            case 'V':;
+                
+                break;
 
             default: printf("internal error: bad node %c\n", a->nodetype);
         }
@@ -791,7 +765,7 @@
 }
 
 //DECLARAÇÃO DE TOKENS
-%token <inteiro> TIPO
+%token <inteiro> TIPO TIPO_TEXTO
 %token <inteiro> INTEIRO
 %token <real> REAL
 %token <texto> TEXTO
@@ -810,6 +784,7 @@
 %token <texto> PLUS LESS
 
 //DECLARAÇÃO DE TIPO DE NÃO-TERMINAIS
+%type <a> declmulttexto
 %type <a> exp declmult atrib list saida incdec //valorvec declvecmult
 %type <a> logica
 %type <a> L1
@@ -852,6 +827,12 @@ declmult: declmult ',' VAR {$$ = newvar($1->nodetype, $3, NULL, $1);}
     | TIPO VAR '=' logica {$$ = newvar($1, $2, $4, NULL);}
     | TIPO VAR {$$ = newvar($1, $2, NULL, NULL);}
     ;
+declmulttexto: declmulttexto ',' VAR {$$ = newvar($1->nodetype, $3, NULL, $1);}
+    | declmulttexto ',' VAR '=' TEXTO {$$ = newvar($1->nodetype, $3, newtexto($5), $1);}
+    | TIPO_TEXTO VAR '=' TEXTO {$$ = newvar($1, $2, newtexto($4), NULL);}
+    | TIPO_TEXTO VAR {$$ = newvar($1, $2, NULL, NULL);}
+    ;
+
     // [1, 2, 3]
     // n1(v, 1,(2, 3) )
     // n2(v, 2, 3)
@@ -866,25 +847,27 @@ declvecmult: TIPO VAR '['']' '=' '[' valorvec ']' {$$ = newvec('V', $2, $7, NULL
     ;
 //*/
 exp: declmult {$$ = $1;}
+    | declmulttexto {$$ = $1;}
     //| declvecmult {$$ = $1;}
     //| SAIDA VAR '[' logica ']' {$$ = newast('v', newtexto($2), $4);}
     | VAR '=' logica {$$ = newasgn($1, $3);}
     | VAR '=' TEXTO {$$ = newasgn($1, newtexto($3));} 
-    | TIPO VAR '=' TEXTO {$$ = newvar($1, $2, newtexto($4), NULL);}
+    //| TIPO VAR '=' TEXTO {$$ = newvar($1, $2, newtexto($4), NULL);}
     | VAR ENTRADA {$$ = newast('c', newValorVal($1), NULL);}
     | IF logica '{' list '}' %prec IFX {$$ = newflow('I', $2, $4, NULL);}
 	| IF logica '{' list '}' ELSE '{' list '}' {$$ = newflow('I', $2, $4, $8);}
 	| WHILE logica '{' list '}' {$$ = newflow('W', $2, $4, NULL);}
-    | FOR atrib ':' logica ':' arit '{' list '}' {$$ = newflowfor('F', $2, $4, $6, $8, NULL);}
-    | COMENTARIO {$$ = newast('P', NULL, NULL);}
+    | FOR atrib ';' logica ';' arit '{' list '}' {$$ = newflowfor('F', $2, $4, $6, $8, NULL);}
+    | COMENTARIO {$$ = newast('P', NULL, newtexto($1));}
     | logica {$$ = newast('P', $1, NULL);}
     | logica '?' exp ':' exp {$$ = newflow('?', $1, $3, $5);}
     | SAIDA saida {$$ = $2;}
+    | SAIDA { $$ = newast('P', NULL, NULL);} 
     | TYPE '(' VAR ')' {$$ = newast('T', newtexto($3), NULL);}
     | incdec {$$ = $1;}
     ; 
     // >> 'autor: ', nome , 'valor: ' , x
-    // SAIDA saida( texto , saida( logica, saida( texto, saida( logica ) ) ) )
+    // SAIDA saida( texto , saida( logica, saida( texto, saida( logica, NULL ) ) ) )
 saida: logica { $$ = newast('P', $1, NULL);}
     | logica ',' saida { $$ = newast('P', $1, $3);}
     | TEXTO {$$ = newast('P', newtexto($1), NULL);}
@@ -932,10 +915,11 @@ arit2: arit3 '^' arit2 {$$ = newast('^',$1,$3);}
     ;
 arit3: '(' logica ')' {$$ = $2;}
     | valor {$$ = $1;}
-    | '(' '-' arit3 ')' %prec IMUNUS {$$ = newast('M',$3,NULL);}
+    | '-' arit3 %prec IMUNUS {$$ = newast('M', $2, NULL);}
     ;
 valor: INTEIRO {$$ = newint($1);}    // codigo 'k'
     | REAL {$$ = newreal($1);}      // codigo 'K'
+    //| '-' REAL {$$ = newast('M', newreal($2), NULL);}      // codigo 'K'
     //| TEXTO {$$ = newtexto($1);}    // codigo 'm'
     | VAR {$$ = newValorVal($1);}   // codigo 'N'
     //| incdec {$$ = $1;}

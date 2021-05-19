@@ -860,7 +860,7 @@ YY_RULE_SETUP
 #line 72 "calc_elidian.l"
 {
     yylval.inteiro = 't';
-    return TIPO;
+    return TIPO_TEXTO;
 }
 	YY_BREAK
 case 4:

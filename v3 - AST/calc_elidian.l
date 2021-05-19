@@ -71,7 +71,7 @@ INVALIDO .
 }
 "texto" {
     yylval.inteiro = 't';
-    return TIPO;
+    return TIPO_TEXTO;
 }
 {TYPE} {
     strcpy(yylval.texto, yytext);
