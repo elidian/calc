@@ -1,41 +1,33 @@
-
 in
 
-  inteiro a = 3
-  real b = 10.5, c = 30.5, area = a * b * c
-  a <<
-  texto autor = "joao", autor2 = "marcos"
-  >> a, " o valor de b: ", b 
-  # escreva o valor da variavel a e b
-  >> c 
-  # escreva o valor da variavel c
-  >> area 
-  >> "A = ", a
-  >> "B = ", b
-  inif a > b { 
-    inwhile a*a>b { 
-      >> "A * A = ", a*a 
-      a-- 
-      >> "A"
-      >> "C"
+    >> "programa iniciado"
+
+    real prod( real x, real z){
+        real res = x * z
+        >> "Resultado = ", res
     }
-  } infi {
-    >> "B"
-    >> "D"
-  }
 
-  inteiro x 
-  infor x = 1; x < 10; 1 { 
-    x = x + 2 
-  } 
-  >> x
+    real funcao( real x, real y){
+        real soma = x + y
+        >> "dentro da funcao"
+        inteiro a = 1, b = 10
+        inif(a>b){
+            >> "dentro do IF"
+            >> a , " > B"
+        } infi {
+            >> "dentro do ELSE"
+            >> "A < ", b
+        }
+        >> "fora do IF ELSE" , " mas dentro da funcao"
+        >> "SOMA = ", soma
+    }
 
-  # operador ternario
-  inteiro num = -5 
-  num < 0 ? >> "sim" : >> "nao"
-  
-  >> 
-  >> "autor", 1, ': ', autor
-  >> "autor", 2.0, ': ', autor2
+    >> "DEPOIS da funcao, mas antes da chamada da funcao"
+    >>;
+    funcao(3, 5)
+    >>;
+    >> "apos a funcao"
+
+    prod(5, 7)
 
 ni

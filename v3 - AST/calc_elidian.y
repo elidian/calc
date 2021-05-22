@@ -23,6 +23,11 @@
 		struct variavels * prox;
 	} VARIAVELS;
 
+    typedef struct ast { /*Estrutura de um nó*/
+        int nodetype;
+        struct ast *l; /*Esquerda*/
+        struct ast *r; /*Direita*/
+    }Ast; 
 
     typedef struct vars {
 		char name[name_size];
@@ -157,6 +162,73 @@
 		return aux;
 	}
 
+    typedef struct varfunction {
+        int nodetype;
+		char name[name_size];
+        double v;
+		struct varfunction * prox;
+	} Varfunction;
+
+    // struct funtion
+    typedef struct function {
+        int nodetype;
+		char name[name_size];
+        struct varfunction *var;
+        Ast *args;
+        Ast *v;
+		struct function * prox;
+	} Function;
+    
+    typedef struct func {
+        int nodetype;
+        int type;
+		char name[name_size];
+        Ast *args;
+        Ast *v;
+	} Func;
+
+    //add nova variável na lista
+    Function * insfunction(Function *l, Func *fun){
+		Function *aux =(Function*)malloc(sizeof(Function));
+		if(!aux) {
+            printf("out of space in insfuntion()\n");
+            exit(1);
+        }
+        aux->nodetype = fun->type;
+        strcpy(aux->name, fun->name);
+        aux->var = NULL;
+        aux->args = fun->args;
+        aux->v = fun->v;
+		aux->prox = l;
+		return aux;
+	}
+	
+    //busca uma variável na lista de variáveis
+    Function *srchfunction(Function *l, char n[]){
+		Function *aux = l;
+		while(aux != NULL){
+			if(strcmp(n,aux->name)==0){
+				return aux;
+			}
+			aux = aux->prox;
+		}
+		return aux;
+	}
+
+    Ast * newfunction(int type, char n[], Ast *a, Ast *fun){
+        Func *aux = (Func*)malloc(sizeof(Func));
+        if(!aux){
+            printf("out of space in newfuntion()");
+            exit(1);
+        }
+        aux->nodetype = 'B';
+        aux->type = type;
+        strcpy(aux->name, n);
+        aux->args = a;
+        aux->v = fun;
+        return (Ast*)aux;
+    }
+
     // VERIFICAR SE DADO VALOR É REAL
     bool isreal(char test[]){
         int i = 0;
@@ -177,13 +249,6 @@
     }
 
     /*O nodetype serve para indicar o tipo de nó que está na árvore. Isso serve para a função eval() entender o que realizar naquele nó*/
-
-    typedef struct ast { /*Estrutura de um nó*/
-        int nodetype;
-        struct ast *l; /*Esquerda*/
-        struct ast *r; /*Direita*/
-    }Ast; 
-
     Ast * newast(int nodetype, Ast *l, Ast *r){ /*Função para criar um nó*/
 
         Ast *a = (Ast*) malloc(sizeof(Ast));
@@ -373,6 +438,7 @@
 	VARS *rvar = NULL;
     VARST *tvar = NULL;
     Veci * ivec = NULL;
+    Function *function = NULL;
 
     bool varexiste(char v[]) {
         VARS* xr = srch(rvar, v);
@@ -750,6 +816,136 @@
                 
                 break;
 
+            case 'B':;
+                if(srchfunction(function, ((Func*)a)->name)==NULL)
+                    function = insfunction(function, ((Func*)a));
+                else
+                    printf("Erro (case 'B'): reescrita de funcao nao permitida\n");
+                
+                break;
+            
+            case 'a':;
+                Function *auxa = srchfunction(function, ((Textoval*)a->l)->v);
+                if(auxa==NULL)
+                    printf("Erro (case 'a'): funcao nao declarada\n");
+                else {
+                    //*
+                    // salva a lista de variaveis antes de iniciar a função
+                    VARSI * i1 = ivar;
+                    VARS *r1 = rvar;
+                    VARST *t1 = tvar;
+
+                    // verifica e executa as declarações e atribuições de ARGUMENTOS da função
+                    if(auxa->args!=NULL && a->r!=NULL) {
+                        Ast *b = auxa->args;
+                        Ast *c = a->r;
+                        while(c){
+                            eval(newvar(b->l->nodetype, ((Symasgn*)b->l)->s, c->l, NULL));
+                            if (b->r!=NULL && c->r!=NULL){
+                                b = b->r;
+                                c = c->r;
+                            } else if(b->r==NULL && c->r==NULL){
+                                // fim de argumentos
+                                break;
+                            } else {
+                                printf("Erro (case 'a'): arg insuficientes\n");
+                            }
+                        }
+                    } else {
+                        printf("Erro (case 'a'): chamada de funcao errada\n");
+                        break;
+                    }
+                    // fim do bloco de ARGUMENTOS da função
+                    //*/
+                    
+                    // chama bloco de codigos dentro da função
+                    if(auxa->v)
+                        eval(auxa->v);
+                    // fim do bloco de codigos dentro da função
+
+                    // excluindo as variaveis apos o final da função
+                    VARSI * i2 = ivar;
+                    VARS *r2 = rvar;
+                    VARST *t2 = tvar;
+                    VARSI * i3 = NULL;
+                    VARS *r3 = NULL;
+                    VARST *t3 = NULL;
+                    if(i1!=NULL){
+                        while(strcmp(i2->name, i1->name)!=0){
+                            if(strcmp(i2->name, i1->name)==0){
+                                ivar = i2;
+                            } else {
+                                i3 = i2;
+                                i2 = i2->prox;
+                                free(i3);
+                                i3 = NULL;
+                            }
+                        }
+                    } else {
+                        while(i2!=NULL){
+                            i3 = i2;
+                            i2 = i2->prox;
+                            free(i3);
+                            i3 = NULL;
+                        }
+                    }
+                    if(i1!=NULL){
+                        while(strcmp(i2->name, i1->name)!=0){
+                            if(r1!=NULL){
+                                if(strcmp(r2->name, r1->name)==0){
+                                    rvar = r2;
+                                } else {
+                                    r3 = r2;
+                                    r2 = r2->prox;
+                                    free(r3);
+                                    r3 = NULL;
+                                }
+                            }
+                        }
+                    } else {
+                        while(r2!=NULL){
+                            r3 = r2;
+                            r2 = r2->prox;
+                            free(r3);
+                            r3 = NULL;
+                        }
+                    }
+                    if(i1!=NULL){
+                        while(strcmp(i2->name, i1->name)!=0){
+                            if(t1!=NULL){
+                                if(strcmp(t2->name, t1->name)==0){
+                                    tvar = t2;
+                                } else {
+                                    t3 = t2;
+                                    t2 = t2->prox;
+                                    free(t3);
+                                    t3 = NULL;
+                                }
+                            }
+                        }
+                    } else {
+                        while(t2!=NULL){
+                            t3 = t2;
+                            t2 = t2->prox;
+                            free(t3);
+                            t3 = NULL;
+                        }
+                    }
+                    // FIM da exclusão da variaveis internas da função
+                }
+                break;
+
+            case 'z':;
+                printf("\n-> Fim do programa! <-\n\n");
+                free(ivar);
+                ivar = NULL;
+                free(rvar);
+                rvar = NULL;
+                free(tvar);
+                tvar = NULL;
+                exit(0);
+                break;
+
             default: printf("internal error: bad node %c\n", a->nodetype);
         }
         return v;
@@ -784,57 +980,60 @@
 %token <texto> PLUS LESS
 
 //DECLARAÇÃO DE TIPO DE NÃO-TERMINAIS
-%type <a> declmulttexto
-%type <a> exp declmult atrib list saida incdec //valorvec declvecmult
+%type <a> declvartexto
+%type <a> exp declvar atrib list saida incdec args arg //valorvec declvecmult
 %type <a> logica
-%type <a> L1
 %type <a> arit
-%type <a> arit0
-%type <a> arit1
-%type <a> arit2
-%type <a> arit3
-%type <a> valor
-
-
+%type <a> valor decl declfunction
+%type <a> iterator
 
 //DECLARAÇÃO DE PRECEDÊNCIA
+//%precedence ITERATOR
 %left OR AND
 %left MAIOR MENOR MEI MAI II DIF
 %right '='
-%left '+' '-'
+%nonassoc NEG
+%left '+' '-' MINUS
 %left '*' '/' '%'
 %right '^'
-%left PLUS1 LESS1
+//%precedence NEG
+//%left PLUS1 LESS1
 %right PLUS2 LESS2
 %left ')'
 %right '('
 
-%nonassoc IMUNUS VAR IFX 
+%nonassoc VAR IFX FUN FUN2 ITERATOR
 
 %start prog
 %%
 
-prog: INICIO cod FINAL {printf("\nFIM\n\n"); return 0;}
+prog: INICIO cod FINAL {eval(newast('z', NULL, NULL));}
     ;
 cod: cod exp {eval($2);}
-    | 
+    | exp {eval($1);}
     ;
 atrib: VAR '=' logica {$$ = newasgn($1, $3);}
     | TIPO VAR '=' logica {$$ = newvar($1, $2, $4, NULL);}
     ;
-declmult: declmult ',' VAR {$$ = newvar($1->nodetype, $3, NULL, $1);}
-    | declmult ',' VAR '=' logica {$$ = newvar($1->nodetype, $3, $5, $1);}
-    | TIPO VAR '=' logica {$$ = newvar($1, $2, $4, NULL);}
-    | TIPO VAR {$$ = newvar($1, $2, NULL, NULL);}
+decl: declvar {$$ = $1;}
+    | declfunction {$$ = $1;}
     ;
-declmulttexto: declmulttexto ',' VAR {$$ = newvar($1->nodetype, $3, NULL, $1);}
-    | declmulttexto ',' VAR '=' TEXTO {$$ = newvar($1->nodetype, $3, newtexto($5), $1);}
+declfunction: TIPO VAR '(' args ')' '{' list '}' %prec FUN {$$ = newfunction($1, $2, $4, $7);}
+    | TIPO VAR '(' ')' '{' list '}' %prec FUN {$$ = newfunction($1, $2, NULL, $6);}
+    ;
+declvar: declvar ',' VAR {$$ = newvar($1->nodetype, $3, NULL, $1);}
+    | declvar ',' VAR '=' logica {$$ = newvar($1->nodetype, $3, $5, $1);}
+    | TIPO VAR '=' logica %prec LESS2 {$$ = newvar($1, $2, $4, NULL);}
+    | TIPO VAR %prec LESS2 {$$ = newvar($1, $2, NULL, NULL);}
+    ;
+declvartexto: declvartexto ',' VAR {$$ = newvar($1->nodetype, $3, NULL, $1);}
+    | declvartexto ',' VAR '=' TEXTO {$$ = newvar($1->nodetype, $3, newtexto($5), $1);}
     | TIPO_TEXTO VAR '=' TEXTO {$$ = newvar($1, $2, newtexto($4), NULL);}
     | TIPO_TEXTO VAR {$$ = newvar($1, $2, NULL, NULL);}
     ;
 
     // [1, 2, 3]
-    // n1(v, 1,(2, 3) )
+    // n1(v, 1, (2, 3) )
     // n2(v, 2, 3)
 /*
 valorvec: logica ',' valorvec {$$ = newast('l', $1, $3);}
@@ -846,8 +1045,8 @@ declvecmult: TIPO VAR '['']' '=' '[' valorvec ']' {$$ = newvec('V', $2, $7, NULL
     | declvecmult ',' VAR '['']' '=' '[' logica ']' {$$ = newvec($1->nodetype, $3, $8, $1);}
     ;
 //*/
-exp: declmult {$$ = $1;}
-    | declmulttexto {$$ = $1;}
+exp: decl {$$ = $1;}
+    | declvartexto {$$ = $1;}
     //| declvecmult {$$ = $1;}
     //| SAIDA VAR '[' logica ']' {$$ = newast('v', newtexto($2), $4);}
     | VAR '=' logica {$$ = newasgn($1, $3);}
@@ -859,13 +1058,27 @@ exp: declmult {$$ = $1;}
 	| WHILE logica '{' list '}' {$$ = newflow('W', $2, $4, NULL);}
     | FOR atrib ';' logica ';' arit '{' list '}' {$$ = newflowfor('F', $2, $4, $6, $8, NULL);}
     | COMENTARIO {$$ = newast('P', NULL, newtexto($1));}
-    | logica {$$ = newast('P', $1, NULL);}
-    | logica '?' exp ':' exp {$$ = newflow('?', $1, $3, $5);}
+    //| logica {$$ = newast('P', $1, NULL);}
+    | iterator {$$ = $1;}
     | SAIDA saida {$$ = $2;}
-    | SAIDA { $$ = newast('P', NULL, NULL);} 
+    | SAIDA ';' { $$ = newast('P', NULL, NULL);} 
     | TYPE '(' VAR ')' {$$ = newast('T', newtexto($3), NULL);}
     | incdec {$$ = $1;}
+    | VAR '(' arg ')' %prec FUN {$$ = newast('a', newtexto($1), $3);}
+    | VAR '(' ')' %prec FUN2 {$$ = newast('a', newtexto($1), NULL);}
     ; 
+iterator: logica '?' exp ':' exp %prec ITERATOR {$$ = newflow('?', $1, $3, $5);}
+    ;
+//*
+args: TIPO VAR {$$ = newast('l', newvar($1, $2, NULL, NULL), NULL);}
+    | TIPO VAR ',' args {$$ = newast('l', newvar($1, $2, NULL, NULL), $4);}
+    //| %empty {$$ = NULL;}
+    ;
+arg: valor {$$ = newast('l', $1, NULL);}
+    | valor ',' arg {$$ = newast('l', $1, $3);}
+    //| %empty {$$ = NULL;}
+    ;
+//*/
     // >> 'autor: ', nome , 'valor: ' , x
     // SAIDA saida( texto , saida( logica, saida( texto, saida( logica, NULL ) ) ) )
 saida: logica { $$ = newast('P', $1, NULL);}
@@ -877,45 +1090,35 @@ saida: logica { $$ = newast('P', $1, NULL);}
     ;
 incdec: VAR PLUS %prec PLUS2 {$$ = newasgn($1, newast('+',newValorVal($1),newint(1)));}
     | VAR LESS %prec LESS2 {$$ = newasgn($1, newast('-',newValorVal($1),newint(1)));}
-    | PLUS VAR %prec PLUS1 {$$ = newast('l', newValorVal($2), newasgn($2, newast('+', newValorVal($2), newint(1))));}
-    | LESS VAR %prec LESS1 {$$ = newast('l', newValorVal($2), newasgn($2, newast('-', newValorVal($2), newint(1))));}
+    //| PLUS VAR %prec PLUS1 {$$ = newast('l', newValorVal($2), newasgn($2, newast('+', newValorVal($2), newint(1))));}
+    //| LESS VAR %prec LESS1 {$$ = newast('l', newValorVal($2), newasgn($2, newast('-', newValorVal($2), newint(1))));}
     ;
 list: exp {$$ = $1;}
     | list exp { $$ = newast('L', $1, $2);}
     ;
-logica: logica OR L1 {$$ = newcmp(7,$1,$3);}
-    | logica AND L1 {$$ = newcmp(8,$1,$3);}
-    | L1 {$$ = $1;}
-    ;
-L1: L1 MAIOR arit {$$ = newcmp(1,$1,$3);}
-    | L1 MENOR arit {$$ = newcmp(2,$1,$3);}
-    | L1 DIF arit {$$ = newcmp(3,$1,$3);}
-    | L1 II arit {$$ = newcmp(4,$1,$3);}
-    | L1 MAI arit {$$ = newcmp(5,$1,$3);}
-    | L1 MEI arit {$$ = newcmp(6,$1,$3);}
+logica: logica OR logica {$$ = newcmp(7,$1,$3);}
+    | logica AND logica {$$ = newcmp(8,$1,$3);}
+    | logica MAIOR logica {$$ = newcmp(1,$1,$3);}
+    | logica MENOR logica {$$ = newcmp(2,$1,$3);}
+    | logica DIF logica {$$ = newcmp(3,$1,$3);}
+    | logica II logica {$$ = newcmp(4,$1,$3);}
+    | logica MAI logica {$$ = newcmp(5,$1,$3);}
+    | logica MEI logica {$$ = newcmp(6,$1,$3);}
     | arit {$$ = $1;}
     ;
 arit: SIN '(' arit ')' {$$ = newast('S',$3,NULL);}
     | COS '(' arit ')' {$$ = newast('C',$3,NULL);}
     | RAIZ '(' arit ')' {$$ = newast('R',$3,NULL);}
+    | '-' arit %prec NEG {$$ = newast('M', $2, NULL);}
     | '|' arit '|' {$$ = newast('A',$2,NULL);}
-    | arit0 {$$=$1;}
-    ;
-arit0: arit0 '+' arit1 {$$ = newast('+',$1,$3);}
-    | arit0 '-' arit1 {$$ = newast('-',$1,$3);}
-    | arit1 {$$=$1;}
-    ;
-arit1: arit1 '*' arit2 {$$ = newast('*',$1,$3);}
-    | arit1 '/' arit2 {$$ = newast('/',$1,$3);}
-    | arit1 '%' arit2 {$$ = newast('%',$1,$3);}
-    | arit2 {$$=$1;}
-    ;
-arit2: arit3 '^' arit2 {$$ = newast('^',$1,$3);}
-    | arit3 {$$=$1;}
-    ;
-arit3: '(' logica ')' {$$ = $2;}
+    | arit '+' arit {$$ = newast('+',$1,$3);}
+    | arit '-' arit %prec MINUS {$$ = newast('-',$1,$3);}
+    | arit '*' arit {$$ = newast('*',$1,$3);}
+    | arit '/' arit {$$ = newast('/',$1,$3);}
+    | arit '%' arit {$$ = newast('%',$1,$3);}
+    | arit '^' arit {$$ = newast('^',$1,$3);}
+    | '(' logica ')' {$$ = $2;}
     | valor {$$ = $1;}
-    | '-' arit3 %prec IMUNUS {$$ = newast('M', $2, NULL);}
     ;
 valor: INTEIRO {$$ = newint($1);}    // codigo 'k'
     | REAL {$$ = newreal($1);}      // codigo 'K'
