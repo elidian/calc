@@ -1,33 +1,23 @@
 in
-
-    >> "programa iniciado"
-
-    real prod( real x, real z){
-        real res = x * z
-        >> "Resultado = ", res
-    }
-
-    real funcao( real x, real y){
-        real soma = x + y
-        >> "dentro da funcao"
-        inteiro a = 1, b = 10
-        inif(a>b){
-            >> "dentro do IF"
-            >> a , " > B"
-        } infi {
-            >> "dentro do ELSE"
-            >> "A < ", b
+    void soma(){
+        void prod(real a, real b){
+            >> "prod: ", a*b
         }
-        >> "fora do IF ELSE" , " mas dentro da funcao"
-        >> "SOMA = ", soma
+        real a = 7, b = 5
+        prod(a, b)
+        >> "SOMA = ", a + b
+        #inout a+b
     }
 
-    >> "DEPOIS da funcao, mas antes da chamada da funcao"
-    >>;
-    funcao(3, 5)
-    >>;
-    >> "apos a funcao"
+    real prod( real a, real b){
+        inout a*b
+    }
 
-    prod(5, 7)
+    soma()
+    >>;
+    real val = prod(5, 5)
+    >> val
+    soma()
+    >> prod(3, 3)
 
 ni

@@ -69,9 +69,17 @@ INVALIDO .
     yylval.inteiro = 'r';
     return TIPO;
 }
+"void" {
+    yylval.inteiro = 'v';
+    return VOID;
+}
 "texto" {
     yylval.inteiro = 't';
     return TIPO_TEXTO;
+}
+"inout" {
+    strcpy(yylval.texto, yytext);
+    return RETURN;
 }
 {TYPE} {
     strcpy(yylval.texto, yytext);
