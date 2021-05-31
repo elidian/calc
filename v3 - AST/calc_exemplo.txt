@@ -1,7 +1,7 @@
 in
     void soma(){
-        void prod(real a, real b){
-            >> "prod: ", a*b
+        void prod(real a, real b){ 
+            >> "prod: ", a*b 
         }
         real a = 7, b = 5
         prod(a, b)
@@ -12,12 +12,29 @@ in
     real prod( real a, real b){
         inout a*b
     }
-
     soma()
+    
     >>;
     real val = prod(5, 5)
     >> val
-    soma()
+    >> soma()
     >> prod(3, 3)
+    
+    >>;
+    real ve[5] = {5, 0, 3, 123}
+    >> ve[0]
+    >> ve[1]
+    >> ve[2]
+    >> ve[3]
+    >> ve[4]
+
+    >>;
+    ve[1] = ve[3]
+    ve[2] = ve[2] * ve[0]
+    >> ve[0]
+    >> ve[1]
+    >> ve[2]
+    >> ve[3]
+    >> ve[4]
 
 ni

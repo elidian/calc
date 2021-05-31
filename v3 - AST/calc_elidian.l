@@ -71,7 +71,7 @@ INVALIDO .
 }
 "void" {
     yylval.inteiro = 'v';
-    return VOID;
+    return TIPO;
 }
 "texto" {
     yylval.inteiro = 't';
@@ -182,6 +182,7 @@ INVALIDO .
 [\n] {
     /* CONTADOR PARA SALTO DE LINHAS */
     yylineno++;
+    return NEWLINHA;
 }
 {IGNORAR} {
   /* ignore */

@@ -871,7 +871,7 @@ YY_RULE_SETUP
 #line 72 "calc_elidian.l"
 {
     yylval.inteiro = 'v';
-    return VOID;
+    return TIPO;
 }
 	YY_BREAK
 case 4:
@@ -1111,28 +1111,29 @@ YY_RULE_SETUP
 {
     /* CONTADOR PARA SALTO DE LINHAS */
     yylineno++;
+    return NEWLINHA;
 }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 186 "calc_elidian.l"
+#line 187 "calc_elidian.l"
 {
   /* ignore */
 }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 189 "calc_elidian.l"
+#line 190 "calc_elidian.l"
 {
   /* ignore */
 }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 193 "calc_elidian.l"
+#line 194 "calc_elidian.l"
 ECHO;
 	YY_BREAK
-#line 1135 "lex.yy.c"
+#line 1136 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2149,6 +2150,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 193 "calc_elidian.l"
+#line 194 "calc_elidian.l"
 
 
