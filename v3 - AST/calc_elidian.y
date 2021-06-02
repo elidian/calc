@@ -50,7 +50,7 @@
     typedef struct vec {
 		int nodetype;
         int tam;
-        char name[name_size];
+        char name[name_size]; 
         double *v;
         //struct veci * in;
 		struct vec * prox;
@@ -964,7 +964,10 @@
                 else if(((Realval*)a->l)->nodetype == 'K')
                     printf ("%.2f", ((Realval*)a->l)->v);		/*Recupera um valor real*/
                 else if(((Textoval*)a->l)->nodetype == 'm') {
-                    printf ("%s", ((Textoval*)a->l)->v);		/*Recupera um valor texto*/
+                    if(strcmp(((Textoval*)a->l)->v, "\\n")==0)
+                        printf("\n");
+                    else
+                        printf ("%s", ((Textoval*)a->l)->v);		/*Recupera um valor texto*/
                 } else {
                     //printf("not 'NN'\n");
                     v = eval(a->l);
@@ -987,7 +990,7 @@
                     //printf("vec name %s\n", vecg->name);
                     Ast *auxz = ((Symasgn *)a)->v;
                     //int posz = 0;
-                    for(int posz = 0; posz<lista->vecg->tam && auxz!=NULL; posz++, auxz = auxz->r){
+                    for(int posz = 0; posz < lista->vecg->tam && auxz!=NULL; posz++, auxz = auxz->r){
                         lista->vecg->v[posz] = eval(auxz->l); /*Atribui à variável*/
                         //auxz = auxz->prox;
                         //posz++;
@@ -1234,7 +1237,6 @@
 %token <texto> NEWLINHA
 %token <texto> IF ELSE FOR WHILE
 %token <texto> VAR
-%token <texto> COMENTARIO
 //TOKENS DE ARITMETICA
 %token <texto> RAIZ COS SIN
 //TOKENS DE LOGICA
@@ -1248,23 +1250,20 @@
 %type <a> arit
 %type <a> valor decl declfunction outfunc
 %type <a> iterator inicio varvar varfun
+%type <a> nl else valorvec declvecmult
 
 //DECLARAÇÃO DE PRECEDÊNCIA
-//%precedence ITERATOR
 %right '='
 %left OR AND MAIOR MENOR MEI MAI II DIF
 %left '+' '-'
 %left '*' '/' '%'
 %right '^'
-//%precedence NEG
-//%left PLUS1 LESS1
 %right PLUS2 LESS2
-%left '('
-//%right '('
+%left ')'
+%right '('
 
-%nonassoc FUN FUN2 ITERATOR NEG
+%nonassoc FUN ITERATOR NEG
 %nonassoc VARP
-%type <a> nl else valorvec declvecmult
 %start prog
 %%
 
@@ -1281,36 +1280,24 @@ nl: {$$ = NULL;}
     ;
 exp: decl {$$ = $1;}
     | declvartexto {$$ = $1;}
-    //| declvecmult {$$ = $1;}
-    //| SAIDA VAR '[' logica ']' {$$ = newast('v', newtexto($2), $4);}
-    //| VAR '=' VAR '(' arg ')' %prec FUN {$$ = newasgn($1, newast('a', newtexto($3), $5));}
     | VAR '=' logica %prec VARP {$$ = newasgn($1, 0, $3);}
     | VAR '[' INTEIRO ']' '=' logica %prec VARP {$$ = newasgn($1, $3, $6);}
     | VAR '=' TEXTO {$$ = newasgn($1, 0, newtexto($3));} 
-    //| TIPO VAR '=' TEXTO {$$ = newvar($1, $2, newtexto($4), NULL);}
     | VAR ENTRADA {$$ = newast('c', newValorVal($1, 0), NULL);}
     | IF logica '{' nl list nl '}' else {$$ = newflow('I', $2, $5, $8);}
-	//| IF logica '{' NEWLINHA list NEWLINHA '}' ELSE '{' NEWLINHA list NEWLINHA '}' {$$ = newflow('I', $2, $5, $11);}
 	| WHILE logica '{' nl list nl '}' {$$ = newflow('W', $2, $4, NULL);}
     | FOR atrib ';' logica ';' arit '{' nl list nl '}' {$$ = newflowfor('F', $2, $4, $6, $9, NULL);}
-    | COMENTARIO {$$ = newast('P', NULL, newtexto($1));}
-    //| logica {$$ = newast('P', $1, NULL);}
     | iterator {$$ = $1;}
     | SAIDA saida %prec FUN {$$ = $2;}
-    //| SAIDA outfunc {$$ = $2;}
     | SAIDA ';' {$$ = newast('P', NULL, NULL);} 
     | TYPE '(' VAR ')' {$$ = newast('T', newtexto($3), NULL);}
     | incdec {$$ = $1;}
     | outfunc {$$ = $1;}
     | RETURN logica {$$ = newast('j', $2, NULL);}
-    //| NEWLINHA {$$ = newast('\n', NULL, NULL);}
     ;
 else: {$$ = NULL;}
     | ELSE '{' nl list nl '}' {$$ = $4;}
     ;
-//else: list {$$ = $1;}
-  //  | NEWLINHA list NEWLINHA {$$ = $2;}
-    //;
 atrib: VAR '=' logica {$$ = newasgn($1, 0, $3);}
     | TIPO VAR '=' logica {$$ = newvar($1, $2, $4, NULL);}
     ;
@@ -1324,19 +1311,14 @@ declfunction:
     ;
 declvar: declvar ',' VAR {$$ = newvar($1->nodetype, $3, NULL, $1);}
     | declvar ',' VAR '=' logica {$$ = newvar($1->nodetype, $3, $5, $1);}
-    | TIPO VAR '=' logica %prec LESS2 {$$ = newvar($1, $2, $4, NULL);}
-    | TIPO VAR %prec LESS2 {$$ = newvar($1, $2, NULL, NULL);}
+    | TIPO VAR '=' logica {$$ = newvar($1, $2, $4, NULL);}
+    | TIPO VAR {$$ = newvar($1, $2, NULL, NULL);}
     ;
 declvartexto: declvartexto ',' VAR {$$ = newvar($1->nodetype, $3, NULL, $1);}
     | declvartexto ',' VAR '=' TEXTO {$$ = newvar($1->nodetype, $3, newtexto($5), $1);}
     | TIPO_TEXTO VAR '=' TEXTO {$$ = newvar($1, $2, newtexto($4), NULL);}
     | TIPO_TEXTO VAR {$$ = newvar($1, $2, NULL, NULL);}
     ;
-
-    // [1, 2, 3]
-    // n1(v, 1, (2, 3) )
-    // n2(v, 2, 3)
-//*
 valorvec: logica ',' valorvec {$$ = newast('l', $1, $3);}
     | logica {$$ = newast('l', $1, NULL);}
     ;
@@ -1345,32 +1327,23 @@ declvecmult: TIPO VAR '[' INTEIRO ']' '=' '{' valorvec '}' {$$ = newvec($1, $2, 
     | declvecmult ',' VAR '[' INTEIRO ']' {$$ = newvec($1->nodetype, $3, $5, NULL, $1);}
     | declvecmult ',' VAR '[' INTEIRO ']' '=' '{' valorvec '}' {$$ = newvec($1->nodetype, $3, $5, $9, $1);}
     ;
-//*/
-//varvar: VAR '(' arg ')' %prec FUN {$$ = newast('a', newtexto($1), $3);}
-    //| logica {$$ = $1;}
-    ;
-outfunc: VAR '(' arg ')' %prec FUN {$$ = newast('a', newtexto($1), $3);}
-    | VAR '(' ')' %prec FUN2 {$$ = newast('a', newtexto($1), NULL);}
+outfunc: VAR '(' arg ')' {$$ = newast('a', newtexto($1), $3);}
+    | VAR '(' ')' {$$ = newast('a', newtexto($1), NULL);}
     ; 
 iterator: '(' logica ')' '?' exp ':' exp %prec ITERATOR {$$ = newflow('?', $2, $5, $7);}
     ;
-//*
 args: TIPO VAR {$$ = newast('l', newvar($1, $2, NULL, NULL), NULL);}
     | TIPO VAR ',' args {$$ = newast('l', newvar($1, $2, NULL, NULL), $4);}
     ;
 arg: valor {$$ = newast('l', $1, NULL);}
     | valor ',' arg {$$ = newast('l', $1, $3);}
     ;
-//*/
-    // >> 'autor: ', nome , 'valor: ' , x
-    // SAIDA saida( texto , saida( logica, saida( texto, saida( logica, NULL ) ) ) )
 saida: logica {$$ = newast('P', $1, NULL);}
     | logica ',' saida { $$ = newast('P', $1, $3);}
     | TEXTO {$$ = newast('P', newtexto($1), NULL);}
     | TEXTO ',' saida {$$ = newast('P', newtexto($1), $3);}
     | incdec {$$ = newast('P', $1, NULL);}
     | incdec ',' saida { $$ = newast('P', $1, $3);}
-    //| VAR '(' arg ')' %prec FUN {$$ = newast('P', newast('a', newtexto($1), $3), NULL);}
     ;
 incdec: VAR PLUS %prec PLUS2 {$$ = newasgn($1, 0, newast('+',newValorVal($1, 0),newint(1)));}
     | VAR LESS %prec LESS2 {$$ = newasgn($1, 0, newast('-',newValorVal($1, 0),newint(1)));}
@@ -1407,17 +1380,10 @@ arit: SIN '(' arit ')' {$$ = newast('S',$3,NULL);}
 
 valor: INTEIRO {$$ = newint($1);}    // codigo 'k'
     | REAL {$$ = newreal($1);}      // codigo 'K'
-    //| '-' REAL {$$ = newast('M', newreal($2), NULL);}      // codigo 'K'
-    //| TEXTO {$$ = newtexto($1);}    // codigo 'm'
-    //| incdec {$$ = $1;}
-    //| VAR {$$ = newValorVal($1);}   // codigo 'N'
-    //| VAR '(' arg ')' {$$ = newast('a', newtexto($1), $3);}
-    //| VAR '(' ')' %prec FUN2 {$$ = newast('a', newtexto($1), NULL);}
-    //*
     | VAR varvar {
         if($2==NULL) $$ = newValorVal($1, 0);
         else $$ = newast('a', newtexto($1), $2->r);
-    }//*/
+    }
     | VAR '[' INTEIRO ']' {$$ = newValorVal($1, $3);}
     ;
 varvar: {$$ = NULL;}
@@ -1425,7 +1391,6 @@ varvar: {$$ = NULL;}
         if ($2!=NULL) $$ = newast('j', NULL, $2->r);
         else $$ = newast('j', NULL, NULL);
     }
-    //| '(' ')' {$$ = newast('j', NULL, NULL);}
     ;
 varfun: {$$ = NULL;}
     | arg {$$ = newast('j', NULL, $1);}

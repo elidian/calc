@@ -54,6 +54,7 @@ VAR {LETRA}({LETRA}|{NUMERO}|"_")*
 
 /* TOKEN PARA COMENTÁRIO */
 COMENTARIO "#".*
+COMENT "/""*"(.|\n)*"*""/"
 
 /* IGNORAR ESPAÇO, TAB */
 IGNORAR [\ \t\s]
@@ -61,6 +62,9 @@ IGNORAR [\ \t\s]
 /* NÃO ACEITAR QUALQUER VALOR DIFERENTE DO QUE ESTIVER ACIMA NESTE CODIGO */
 INVALIDO .
 %%
+{COMENT} {
+    ;
+}
 "inteiro" {
     yylval.inteiro = 'i';
     return TIPO;
@@ -176,8 +180,7 @@ INVALIDO .
     return VAR;
 }
 {COMENTARIO} {
-    strcpy(yylval.texto, yytext);
-    return COMENTARIO;
+    ;
 }
 [\n] {
     /* CONTADOR PARA SALTO DE LINHAS */
