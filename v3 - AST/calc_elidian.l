@@ -65,6 +65,9 @@ INVALIDO .
 {COMENT} {
     ;
 }
+{COMENTARIO} {
+    ;
+}
 "inteiro" {
     yylval.inteiro = 'i';
     return TIPO;
@@ -178,9 +181,6 @@ INVALIDO .
 {VAR} {
     strcpy(yylval.texto, yytext);
     return VAR;
-}
-{COMENTARIO} {
-    ;
 }
 [\n] {
     /* CONTADOR PARA SALTO DE LINHAS */

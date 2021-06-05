@@ -1,44 +1,52 @@
 in
-    void soma(){
-        void prod(real a, real b){ 
-            >> "prod: ", a*b 
+
+    real juroscomposto(real c, real i, real t){
+        #>> "M ", c*((1+(i/100))^t)
+        inout c*(1+i/100)^t
+    }
+
+    real capital, montante, juros
+    real taxa[1]
+
+    inteiro periodo
+    texto nome
+
+    >> "SIMULADOR DE EMPRESTIMOS"
+    >> "Qual seu nome?"
+    nome <<
+    >> "Qual o valor de Capital desejado?"
+    capital <<
+    >> "Qual a duracao do pagamento em meses?"
+    periodo <<
+    >> "Qual a taxa de juros ao mes?"
+    taxa[0] <<
+    >>;
+
+    montante = juroscomposto(capital, taxa[0], periodo)
+
+    >> "Vejamos Sr(a) ", nome
+    >> "O Montante seria igual a ", montante, " reais"
+
+    >>;
+    >> "Sendo o Montante igual a soma do Capital e do Juros total"
+    >> "\n", "Resumo"
+    >> "Capital = ", capital
+    
+    juros = montante - capital
+    >> "Juros = ", juros
+
+    >> "Qual o sistema de amortizacao?"
+    >> "(1) Tabela Prime"
+    >> "(2) Tabela SAC"
+    int tab
+    tab <<
+
+    inif(tab == 1){
+
+    } infi {
+        inif(tab == 2){
+
         }
-        real a = 7, b = 5
-        prod(a, b)
-        >> "SOMA = ", a + b
-        #inout a+b
     }
-
-    real prod( real a, real b){
-        inout a*b
-    }
-    soma()
-    
-    >>;
-    real val = prod(5, 5)
-    >> val
-    >> soma()
-    >> prod(3, 3)
-    
-    >>;
-    real ve[5] = {5, 0, 3, 123}
-    >> ve[0]
-    /* 
-    >> ve[1] 
-    >> ve[2] 
-    >> ve[3] 
-    */
-    >> ve[4]
-
-    >>;
-    ve[1] = ve[3]
-    ve[2] = ve[2] * ve[0]
-    >> ve[0]
-    >> ve[1]
-    >> ve[2]
-    >> ve[3]
-    >> ve[4]
-
-    >> "1", "\n", "3"
 
 ni

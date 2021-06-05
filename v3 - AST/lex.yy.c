@@ -381,16 +381,16 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[95] =
     {   0,
-        0,    0,   40,   38,   37,   36,   38,   38,   35,   10,
-       38,   38,   11,   10,   10,   38,   10,   27,   15,   11,
-       16,   34,   34,   34,   34,   34,   34,   34,   34,   10,
-       20,    0,   29,   35,   22,    0,    8,    9,   28,    0,
-        0,   27,   23,   17,   19,   18,   24,   34,   34,   25,
-       26,   34,   34,   34,   34,   34,   34,   21,    0,    0,
-       13,   34,   34,   34,   34,   34,   34,   34,   14,   34,
-       34,   34,    1,   31,   34,   30,   34,   34,   34,   12,
-        3,   34,    7,    4,   32,    6,   34,   34,    5,   34,
-       34,    2,   33,    0
+        0,    0,   40,   38,   37,   36,   38,   38,    2,   11,
+       38,   38,   12,   11,   11,   38,   11,   28,   16,   12,
+       17,   35,   35,   35,   35,   35,   35,   35,   35,   11,
+       21,    0,   30,    2,   23,    0,    9,   10,   29,    0,
+        0,   28,   24,   18,   20,   19,   25,   35,   35,   26,
+       27,   35,   35,   35,   35,   35,   35,   22,    0,    0,
+       14,   35,   35,   35,   35,   35,   35,   35,   15,   35,
+       35,   35,    1,   32,   35,   31,   35,   35,   35,   13,
+        4,   35,    8,    5,   33,    7,   35,   35,    6,   35,
+       35,    3,   34,    0
 
     } ;
 
@@ -535,7 +535,7 @@ static const flex_int16_t yy_chk[252] =
 static const flex_int32_t yy_rule_can_match_eol[40] =
     {   0,
 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 
         };
 
 static yy_state_type yy_last_accepting_state;
@@ -867,203 +867,210 @@ case 2:
 YY_RULE_SETUP
 #line 68 "calc_elidian.l"
 {
-    yylval.inteiro = 'i';
-    return TIPO;
+    ;
 }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 72 "calc_elidian.l"
+#line 71 "calc_elidian.l"
 {
-    yylval.inteiro = 'r';
+    yylval.inteiro = 'i';
     return TIPO;
 }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 76 "calc_elidian.l"
+#line 75 "calc_elidian.l"
 {
-    yylval.inteiro = 'v';
+    yylval.inteiro = 'r';
     return TIPO;
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 80 "calc_elidian.l"
+#line 79 "calc_elidian.l"
+{
+    yylval.inteiro = 'v';
+    return TIPO;
+}
+	YY_BREAK
+case 6:
+YY_RULE_SETUP
+#line 83 "calc_elidian.l"
 {
     yylval.inteiro = 't';
     return TIPO_TEXTO;
 }
 	YY_BREAK
-case 6:
+case 7:
 YY_RULE_SETUP
-#line 84 "calc_elidian.l"
+#line 87 "calc_elidian.l"
 {
     strcpy(yylval.texto, yytext);
     return RETURN;
 }
 	YY_BREAK
-case 7:
+case 8:
 YY_RULE_SETUP
-#line 88 "calc_elidian.l"
+#line 91 "calc_elidian.l"
 {
     strcpy(yylval.texto, yytext);
     return TYPE;
-}
-	YY_BREAK
-case 8:
-YY_RULE_SETUP
-#line 92 "calc_elidian.l"
-{
-    return PLUS;
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 95 "calc_elidian.l"
 {
-    return LESS;
+    return PLUS;
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 98 "calc_elidian.l"
 {
-  return *yytext;
+    return LESS;
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 102 "calc_elidian.l"
+#line 101 "calc_elidian.l"
 {
-    return yytext[0];
+  return *yytext;
 }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 105 "calc_elidian.l"
 {
-    return RAIZ;
+    return yytext[0];
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 108 "calc_elidian.l"
 {
-    return COS;
+    return RAIZ;
 }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 111 "calc_elidian.l"
 {
-    return SIN;
+    return COS;
 }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 114 "calc_elidian.l"
 {
-    return MENOR;
+    return SIN;
 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 117 "calc_elidian.l"
 {
-    return MAIOR;
+    return MENOR;
 }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 120 "calc_elidian.l"
 {
-    return MEI;
+    return MAIOR;
 }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 123 "calc_elidian.l"
 {
-    return MAI;
+    return MEI;
 }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 126 "calc_elidian.l"
 {
-    return II;
+    return MAI;
 }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 129 "calc_elidian.l"
 {
-    return DIF;
+    return II;
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 132 "calc_elidian.l"
 {
-    return OR;
+    return DIF;
 }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 135 "calc_elidian.l"
 {
-    return AND;
+    return OR;
 }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 138 "calc_elidian.l"
 {
-    return ENTRADA;
+    return AND;
 }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 141 "calc_elidian.l"
 {
-    return SAIDA;
+    return ENTRADA;
 }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 144 "calc_elidian.l"
 {
-    return INICIO;
+    return SAIDA;
 }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 147 "calc_elidian.l"
 {
-    return FINAL;
+    return INICIO;
 }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 150 "calc_elidian.l"
 {
-    yylval.inteiro = atoi(yytext);
-    return INTEIRO;
+    return FINAL;
 }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 154 "calc_elidian.l"
+#line 153 "calc_elidian.l"
+{
+    yylval.inteiro = atoi(yytext);
+    return INTEIRO;
+}
+	YY_BREAK
+case 29:
+YY_RULE_SETUP
+#line 157 "calc_elidian.l"
 {
     yylval.real = atof(yytext);
     return REAL;
 }
 	YY_BREAK
-case 29:
-/* rule 29 can match eol */
+case 30:
+/* rule 30 can match eol */
 YY_RULE_SETUP
-#line 158 "calc_elidian.l"
+#line 161 "calc_elidian.l"
 {
     for(int x=0; x<strlen(yytext); x++){
         yytext[x] = yytext[x+1];
@@ -1073,47 +1080,40 @@ YY_RULE_SETUP
     return TEXTO;
 }
 	YY_BREAK
-case 30:
-YY_RULE_SETUP
-#line 166 "calc_elidian.l"
-{
-    return IF;
-}
-	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 169 "calc_elidian.l"
 {
-    return ELSE;
+    return IF;
 }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 172 "calc_elidian.l"
 {
-    return FOR;
+    return ELSE;
 }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 175 "calc_elidian.l"
 {
-    return WHILE;
+    return FOR;
 }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
 #line 178 "calc_elidian.l"
 {
-    strcpy(yylval.texto, yytext);
-    return VAR;
+    return WHILE;
 }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 182 "calc_elidian.l"
+#line 181 "calc_elidian.l"
 {
-    ;
+    strcpy(yylval.texto, yytext);
+    return VAR;
 }
 	YY_BREAK
 case 36:
