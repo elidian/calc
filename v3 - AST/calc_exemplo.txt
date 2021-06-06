@@ -1,14 +1,19 @@
 in
 
     real juroscomposto(real c, real i, real t){
-        #>> "M ", c*((1+(i/100))^t)
-        inout c*(1+i/100)^t
+        i =  i/100
+        #>> "M ", c*((1+(i))^t)
+        inout c*(1+i)^t
     }
 
-    real capital, montante, juros
-    real taxa[1]
+    real prestacao_prime(real c, real i, real t){
+        i = i/100
+        #>> "P ", (c*((1+i)^t)*i)/((1+i)^t-1)
+        inout c*(1+i)^t*i/((1+i)^t-1)
+    }
 
-    inteiro periodo
+    real capital, montante, juros, taxa
+    inteiro periodo, op
     texto nome
 
     >> "SIMULADOR DE EMPRESTIMOS"
@@ -19,34 +24,106 @@ in
     >> "Qual a duracao do pagamento em meses?"
     periodo <<
     >> "Qual a taxa de juros ao mes?"
-    taxa[0] <<
+    taxa <<
     >>;
 
-    montante = juroscomposto(capital, taxa[0], periodo)
+    montante = juroscomposto(capital, taxa, periodo)
 
-    >> "Vejamos Sr(a) ", nome
-    >> "O Montante seria igual a ", montante, " reais"
-
-    >>;
-    >> "Sendo o Montante igual a soma do Capital e do Juros total"
-    >> "\n", "Resumo"
-    >> "Capital = ", capital
-    
+    >> "Vejamos, Sr(a) ", nome, ","
+    >> "-> INVESTIMENTO <-"
+    >> "O Capital aplicado renderia um Montante de ", montante, " reais se no regime do juros composto."
+    >> "Sendo o Montante igual a soma do Capital e do Juros composto total."
+    >> "\n", "----------------------"
+    >> "Resumo"
+    >> "----------------------"
+    >> "Capital  = ", capital
     juros = montante - capital
-    >> "Juros = ", juros
+    >> "Juros    = ", juros
+    >> "----------------------"
+    >> "Montante = ", montante
+    >> "----------------------"
 
+    >>;
+    >> "-> EMPRESTIMO <-"
     >> "Qual o sistema de amortizacao?"
     >> "(1) Tabela Prime"
     >> "(2) Tabela SAC"
-    int tab
-    tab <<
+    >> "(3) Sair"
+    op <<
 
-    inif(tab == 1){
+    
+    inteiro t
+    real prestacao1
+    real j[periodo + 1], a1[periodo + 1], d[periodo + 1]
+    real prestacao2[periodo + 1]
+    real a2
+    real total[4]
 
-    } infi {
-        inif(tab == 2){
-
+    inwhile(op==1 || op ==2){
+        total[0] = 0
+        total[1] = 0
+        total[2] = 0
+        total[3] = capital
+        inif op == 1 {
+            prestacao1 = prestacao_prime(capital, taxa, periodo)
+            t = 0
+            d[0] = capital
+            
+            >>;
+            >> "A prestacao no modelo PRIME eh ", prestacao1
+            >>;
+            >> "TABELA PRIME"
+            >> "----------------------------------------------------------------------"
+            >> "Mes   | Prestacao    | Juros    | Amortizacao    | Saldo Devedor " 
+            >> "----------------------------------------------------------------------"
+            >> "0     |              |          |                | ", d[0] 
+            inwhile t < periodo {
+                t++
+                j[t] = d[t - 1]*taxa/100
+                a1[t] = prestacao1 - j[t]
+                d[t] = d[t - 1] - a1[t]
+                total[0] = total[0] + prestacao1
+                total[1] = total[1] + j[t]
+                total[2] = total[2] + a1[t]
+                total[3] = d[t]
+                >> t, "     | ", prestacao1 ,"       | ", j[t] ,"   | ", a1[t] ,"       | ", d[t] 
+            }
+        } infi {
+            inif op == 2 {
+                a2 = capital/periodo
+                t = 0
+                d[0] = capital
+                prestacao2 = a2 + d[0]*taxa/100
+                
+                >>;
+                >> "A prestacao no modelo SAC comeca em ", prestacao2
+                >>;
+                >> "TABELA PRIME"
+                >> "----------------------------------------------------------------------"
+                >> "Mes   | Prestacao    | Juros    | Amortizacao | Saldo Devedor " 
+                >> "----------------------------------------------------------------------"
+                >> "0     |              |          |             | ", d[0] 
+                inwhile t < periodo {
+                    t++
+                    j[t] = d[t - 1]*taxa/100
+                    prestacao2[t] = a2 + j[t]
+                    d[t] = d[t - 1] - a2
+                    total[0] = total[0] + prestacao2[t]
+                    total[1] = total[1] + j[t]
+                    total[2] = total[2] + a2
+                    total[3] = d[t]
+                    >> t, "     | ", prestacao2[t] ,"       | ", j[t] ,"   | ", a2 ,"       | ", d[t] 
+                }
+            }
         }
+        >> "----------------------------------------------------------------------"
+        >> "Total     | ", total[0] ,"       | ", total[1] ,"   | ", total[2] ,"       | ", total[3] 
+        
+        >>;
+        >> "-> EMPRESTIMO <-"
+        >> "Qual o sistema de amortizacao?"
+        >> "(1) Tabela Prime"
+        >> "(2) Tabela SAC"
+        op <<
     }
-
 ni

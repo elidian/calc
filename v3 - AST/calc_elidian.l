@@ -80,6 +80,10 @@ INVALIDO .
     yylval.inteiro = 'v';
     return TIPO;
 }
+"pass" {
+    strcpy(yylval.texto, yytext);
+    return PASS;
+}
 "texto" {
     yylval.inteiro = 't';
     return TIPO_TEXTO;
@@ -163,7 +167,7 @@ INVALIDO .
         yytext[x] = yytext[x+1];
     }
     yytext[strlen(yytext)-1] = '\0';
-    strcpy(yylval.texto, yytext);
+    strcpy(yylval.stexto, yytext);
     return TEXTO;
 }
 {IF} {

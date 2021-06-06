@@ -111,7 +111,7 @@
         int nodetype;
         int type;
         char s[name_size];
-        int tam;
+        Ast *tam;
         Ast *v;
         Ast *n;
     }Symasgn;
@@ -148,7 +148,7 @@
     typedef struct varval { /*Estrutura de um nome de variável, nesse exemplo uma variável é um número no vetor var[26]*/
         int nodetype;
         char var[name_size];
-        int pos;
+        Ast *pos;
     }Varval;
 
     typedef struct listavar {
@@ -505,7 +505,7 @@
     }
 
     // função pra declarar variavel e atribuir
-    Ast * newvec(int t, char s[], int tam, Ast *v, Ast *n){
+    Ast * newvec(int t, char s[], Ast *tam, Ast *v, Ast *n){
         Symasgn *a = (Symasgn*)malloc(sizeof(Symasgn));
         if(!a) {
             printf("out of space");
@@ -520,7 +520,7 @@
         return (Ast *)a;
     }
 
-    Ast * newasgn(char s[], int pos, Ast *v) { /*Função para um nó de atribuição*/
+    Ast * newasgn(char s[], Ast *pos, Ast *v) { /*Função para um nó de atribuição*/
         Symasgn *a = (Symasgn*)malloc(sizeof(Symasgn));
         if(!a) {
             printf("out of space");
@@ -601,7 +601,7 @@
         return (Ast*)a;
     }
 
-    Ast * newValorVal(char s[], int pos) { /*Função que recupera o nome/referência de uma variável, neste caso o número*/    
+    Ast * newValorVal(char s[], Ast *pos) { /*Função que recupera o nome/referência de uma variável, neste caso o número*/    
         Varval *a = (Varval*) malloc(sizeof(Varval));
         if(!a) {
             printf("out of space");
@@ -748,6 +748,8 @@
         }
     }
 
+    double eval(Ast *a);
+
     char *evalt(Ast *a){
         char *t = NULL;
         if(!a) {
@@ -815,6 +817,7 @@
                     break;
                 }
                 while(auxl!=NULL){
+                    int z = eval(((Varval*)a)->pos);
                     auxr = srch(auxl->rvar, ((Varval*)a)->var);
                     if (!auxr){
                         auxi = srchi(auxl->ivar, ((Varval*)a)->var);
@@ -832,27 +835,27 @@
                                                 break;
                                             }
                                         } else {
-                                            if (((Varval*)a)->pos<auxvt->tam){
+                                            if (z<auxvt->tam){
                                                 //printf("opa\n");
-                                                t = auxvt->v[((Varval*)a)->pos];
+                                                t = auxvt->v[z];
                                             } else {
                                                 printf("Erro (case 'N') - posicao fora do tamanho do vetor. Return 0.\n");
                                             }
                                             break;
                                         }
                                     } else {
-                                        if (((Varval*)a)->pos<auxvi->tam){
-                                            t = (char*)malloc(auxvi->v[((Varval*)a)->pos]*sizeof(char));
-                                            sprintf(t, "%d", auxvi->v[((Varval*)a)->pos]);
+                                        if (z<auxvi->tam){
+                                            t = (char*)malloc(auxvi->v[z]*sizeof(char));
+                                            sprintf(t, "%d", auxvi->v[z]);
                                         } else {
                                             printf("Erro (case 'N') - posicao fora do tamanho do vetor. Return 0.\n");
                                         }
                                         break;
                                     }
                                 } else {
-                                    if (((Varval*)a)->pos<auxvr->tam){
-                                        t = (char*)malloc(auxvr->v[((Varval*)a)->pos]*sizeof(char));
-                                        sprintf(t, "%f", auxvr->v[((Varval*)a)->pos]);
+                                    if (z<auxvr->tam){
+                                        t = (char*)malloc(auxvr->v[z]*sizeof(char));
+                                        sprintf(t, "%f", auxvr->v[z]);
                                     } else {
                                         printf("Erro (case 'N') - posicao fora do tamanho do vetor. Return 0.\n");
                                     }
@@ -949,6 +952,7 @@
 //                printf("case N begin while\n");
                 while(auxl!=NULL){
                     //printf("case 'N' %d\n", i++);
+                    int p = eval(((Varval*)a)->pos);
                     auxr = srch(auxl->rvar, ((Varval*)a)->var);
                     if (!auxr){
                         auxi = srchi(auxl->ivar, ((Varval*)a)->var);
@@ -967,8 +971,8 @@
                                                 break;
                                             }
                                         } else {
-                                            if (((Varval*)a)->pos<auxvt->tam)
-                                                v = atof(auxvt->v[((Varval*)a)->pos]);
+                                            if (p<auxvt->tam)
+                                                v = atof(auxvt->v[p]);
                                             else {
                                                 v = 0;
                                                 printf("Erro (case 'N') - posicao fora do tamanho do vetor. Return 0.\n");
@@ -976,8 +980,8 @@
                                             break;
                                         }
                                     } else {
-                                        if (((Varval*)a)->pos<auxvi->tam)
-                                            v = auxvi->v[((Varval*)a)->pos];
+                                        if (p<auxvi->tam)
+                                            v = auxvi->v[p];
                                         else {
                                             v = 0;
                                             printf("Erro (case 'N') - posicao fora do tamanho do vetor. Return 0.\n");
@@ -985,8 +989,8 @@
                                         break;
                                     }
                                 } else {
-                                    if (((Varval*)a)->pos<auxvr->tam)
-                                        v = auxvr->v[((Varval*)a)->pos];
+                                    if (p<auxvr->tam)
+                                        v = auxvr->v[p];
                                     else {
                                         v = 0;
                                         printf("Erro (case 'N') - posicao fora do tamanho do vetor. Return 0.\n");
@@ -1062,6 +1066,7 @@
                 }
                 //printf("case = begin while\n");
                 while(auxl!=NULL){
+                    int x = eval(((Symasgn *)a)->tam);
                     auxr = srch(auxl->rvar, ((Symasgn *)a)->s);
                     if(!auxr){
                         auxi = srchi(auxl->ivar, ((Symasgn *)a)->s);
@@ -1080,13 +1085,13 @@
                                                 break;
                                             }
                                         } else {
-                                            auxvt->v[((Symasgn *)a)->tam] = evalt(((Symasgn *)a)->v);
+                                            auxvt->v[x] = evalt(((Symasgn *)a)->v);
                                         }
                                     } else {
-                                        auxvi->v[((Symasgn *)a)->tam] = v;
+                                        auxvi->v[x] = v;
                                     }
                                 } else {
-                                    auxvr->v[((Symasgn *)a)->tam] = v;
+                                    auxvr->v[x] = v;
                                 }
                             } else {
                                 strcpy(auxt->v, evalt(((Symasgn *)a)->v)); /*Atribui à variável*/
@@ -1178,7 +1183,7 @@
             break;
             // multiplas linhas de códigos em IF/ELSE/WHILE/FOR
             case 'L': eval(a->l); v = eval(a->r); break; /*Lista de operções em um bloco IF/ELSE/WHILE. Assim o analisador não se perde entre os blocos*/
-            case 'l': v = eval(a->l); eval(a->r); break;
+            case 'l': if(a->l) v = eval(a->l); if(a->r) eval(a->r); break;
             case 'j': v = eval(a->l); return v; break;
             // print na tela
             case 'P':;
@@ -1193,7 +1198,8 @@
                     //a->l->nodetype = 'n';
                     //if(!lista)
                         //printf("lista null\n");
-                    printValorVar(lista, ((Varval*)a->l)->var, ((Varval*)a->l)->pos);
+                    int w = eval(((Varval*)a->l)->pos);
+                    printValorVar(lista, ((Varval*)a->l)->var, w);
                     //printf("nodetype 'NN'\n");
                 }
                 else if(((Intval*)a->l)->nodetype == 'k')
@@ -1225,36 +1231,37 @@
                 if(!varexiste(lista, ((Symasgn *)a)->s)){
                     Ast *auxv = ((Symasgn *)a)->v;
                     int posv = 0;
+                    int y = eval(((Symasgn *)a)->tam);
+                    
                     switch(((Symasgn *)a)->type){
                         case 'r':;
-                            lista->rvec = insvecr(lista->rvec, ((Symasgn *)a)->type, ((Symasgn *)a)->s, ((Symasgn *)a)->tam);
+                            lista->rvec = insvecr(lista->rvec, ((Symasgn *)a)->type, ((Symasgn *)a)->s, y);
                             for(posv = 0; posv < lista->rvec->tam && auxv!=NULL; posv++, auxv = auxv->r){
                                 lista->rvec->v[posv] = eval(auxv->l); /*Atribui à variável*/
                             }
                             break;
                         case 'i':;
-                            lista->ivec = insveci(lista->ivec, ((Symasgn *)a)->type, ((Symasgn *)a)->s, ((Symasgn *)a)->tam);
+                            lista->ivec = insveci(lista->ivec, ((Symasgn *)a)->type, ((Symasgn *)a)->s, y);
                             for(posv = 0; posv < lista->ivec->tam && auxv!=NULL; posv++, auxv = auxv->r){
                                 lista->ivec->v[posv] = eval(auxv->l); /*Atribui à variável*/
                             }
                             break;
                         case 't':;
-                            //printf("case V-t: %s\n", evalt(auxv->l));
-                            lista->tvec = insvect(lista->tvec, ((Symasgn *)a)->type, ((Symasgn *)a)->s, ((Symasgn *)a)->tam);
-                            //printf("case V-t: %s\n", evalt(auxv->l));
+                            lista->tvec = insvect(lista->tvec, ((Symasgn *)a)->type, ((Symasgn *)a)->s, y);
+                            
                             for(posv = 0; posv < lista->tvec->tam ; posv++){
                                 if(auxv){
-                                    //printf("t1\n");
                                     lista->tvec->v[posv] = evalt(auxv->l); /*Atribui à variável*/
                                     auxv = auxv->r;
                                 }else{
-                                    //printf("t2\n");
                                     lista->tvec->v[posv] = evalt(newtexto(""));
                                 }
                             }
                             break;
+                        default:;
+                            printf("\nErro (case 'V'): sem case\n");
+                            break;
                     }
-                    //printf("vec name %.2f\n", vecg->v[3]);
                 }else
                     printf("\nErro (case 'i'): variavel '%s' ja existe.\n", ((Symasgn *)a)->s);                
                 break;
@@ -1302,6 +1309,7 @@
                 //v = eval(((Symasgn *)a)->v); /*Recupera o valor*/
                 auxl = lista;
                 while(auxl != NULL){
+                    int r = eval(((Varval *)a->l)->pos);
                     auxr = srch(auxl->rvar, ((Varval *)a->l)->var);
                     if(auxr){
                         scanf("%Lf", &auxr->v);
@@ -1319,17 +1327,17 @@
                             } else {
                                 auxvr = srchvecr(auxl->rvec, ((Varval *)a->l)->var);
                                 if(auxvr){
-                                    scanf("%Lf", &auxvr->v[((Varval *)a->l)->pos]);
+                                    scanf("%Lf", &auxvr->v[r]);
                                     break;
                                 } else {
                                     auxvi = srchveci(auxl->ivec, ((Varval *)a->l)->var);
                                     if(auxvi){
-                                        scanf("%d", &auxvi->v[((Varval *)a->l)->pos]);
+                                        scanf("%d", &auxvi->v[r]);
                                         break;
                                     } else {
                                         auxvt = srchvect(auxl->tvec, ((Varval *)a->l)->var);
                                         if(auxvt){
-                                            scanf("%s", &auxvt->v[((Varval *)a->l)->pos]);
+                                            scanf("%s", &auxvt->v[r]);
                                             break;
                                         } else {
                                             if(auxl->prox == NULL)
@@ -1485,6 +1493,7 @@
 
 %union{
     char texto[50];
+    char stexto[1000];
     int inteiro;
     double real;
     Ast *a;
@@ -1494,7 +1503,7 @@
 %token <inteiro> TIPO TIPO_TEXTO
 %token <inteiro> INTEIRO
 %token <real> REAL
-%token <texto> TEXTO
+%token <stexto> TEXTO
 %token <texto> TYPE RETURN
 %token <texto> ENTRADA
 %token <texto> SAIDA
@@ -1502,7 +1511,7 @@
 %token <texto> FINAL
 %token <texto> NEWLINHA
 %token <texto> IF ELSE FOR WHILE
-%token <texto> VAR
+%token <texto> VAR PASS
 //TOKENS DE ARITMETICA
 %token <texto> RAIZ COS SIN
 //TOKENS DE LOGICA
@@ -1520,7 +1529,8 @@
 
 //DECLARAÇÃO DE PRECEDÊNCIA
 %right '='
-%left OR AND MAIOR MENOR MEI MAI II DIF
+%left OR AND
+%left MAIOR MENOR MEI MAI II DIF
 %left '+' '-'
 %left '*' '/' '%'
 %right '^'
@@ -1545,14 +1555,14 @@ nl: {$$ = NULL;}
     | NEWLINHA nl {$$ = NULL;}
     ;
 exp: decl {$$ = $1;}
-    | VAR '=' logica %prec VARP {$$ = newasgn($1, 0, $3);}
-    | VAR '[' INTEIRO ']' '=' logica %prec VARP {$$ = newasgn($1, $3, $6);}
-    | VAR '=' TEXTO {$$ = newasgn($1, 0, newtexto($3));} 
-    | VAR '[' INTEIRO ']' '=' TEXTO {$$ = newasgn($1, $3, newtexto($6));} 
-    | VAR ENTRADA {$$ = newast('c', newValorVal($1, 0), NULL);}
-    | VAR '[' INTEIRO ']' ENTRADA {$$ = newast('c', newValorVal($1, $3), NULL);}
+    | VAR '=' logica %prec VARP {$$ = newasgn($1, newint(0), $3);}
+    | VAR '[' arit ']' '=' logica %prec VARP {$$ = newasgn($1, $3, $6);}
+    | VAR '=' TEXTO {$$ = newasgn($1, newint(0), newtexto($3));} 
+    | VAR '[' arit ']' '=' TEXTO {$$ = newasgn($1, $3, newtexto($6));} 
+    | VAR ENTRADA {$$ = newast('c', newValorVal($1, newint(0)), NULL);}
+    | VAR '[' arit ']' ENTRADA {$$ = newast('c', newValorVal($1, $3), NULL);}
     | IF logica nl '{' nl list nl '}' else {$$ = newflow('I', $2, $6, $9);}
-	| WHILE logica nl '{' nl list nl '}' {$$ = newflow('W', $2, $5, NULL);}
+	| WHILE logica nl '{' nl list nl '}' {$$ = newflow('W', $2, $6, NULL);}
     | FOR atrib ';' logica ';' arit '{' nl list nl '}' {$$ = newflowfor('F', $2, $4, $6, $9, NULL);}
     | iterator {$$ = $1;}
     | SAIDA saida %prec FUN {$$ = $2;}
@@ -1561,11 +1571,12 @@ exp: decl {$$ = $1;}
     | incdec {$$ = $1;}
     | outfunc {$$ = $1;}
     | RETURN logica {$$ = newast('j', $2, NULL);}
+    | PASS {$$ = newast('l', NULL, NULL);}
     ;
 else: {$$ = NULL;}
-    | nl ELSE nl '{' nl list nl '}' {$$ = $6;}
+    | ELSE nl '{' nl list nl '}' {$$ = $5;}
     ;
-atrib: VAR '=' logica {$$ = newasgn($1, 0, $3);}
+atrib: VAR '=' logica {$$ = newasgn($1, newint(0), $3);}
     | TIPO VAR '=' logica {$$ = newvar($1, $2, $4, NULL);}
     ;
 decl: declvar {$$ = $1;}
@@ -1588,10 +1599,10 @@ declvartexto: declvartexto ',' VAR {$$ = newvar($1->nodetype, $3, NULL, $1);}
     | TIPO_TEXTO VAR '=' TEXTO {$$ = newvar($1, $2, newtexto($4), NULL);}
     | TIPO_TEXTO VAR {$$ = newvar($1, $2, NULL, NULL);}
     ;
-declvectexto: declvectexto ',' VAR '[' INTEIRO ']' {$$ = newvec($1->nodetype, $3, $5, NULL, $1);}
-    | declvectexto ',' VAR '[' INTEIRO ']' '=' '{' valorvectexto '}' {$$ = newvec($1->nodetype, $3, $5, $9, $1);}
-    | TIPO_TEXTO VAR '[' INTEIRO ']' '=' '{' valorvectexto '}' {$$ = newvec($1, $2, $4, $8, NULL);}
-    | TIPO_TEXTO VAR '[' INTEIRO ']' {$$ = newvec($1, $2, $4, NULL, NULL);}
+declvectexto: declvectexto ',' VAR '[' arit ']' {$$ = newvec(((Symasgn*)$1)->type, $3, $5, NULL, $1);}
+    | declvectexto ',' VAR '[' arit ']' '=' '{' valorvectexto '}' {$$ = newvec(((Symasgn*)$1)->type, $3, $5, $9, $1);}
+    | TIPO_TEXTO VAR '[' arit ']' '=' '{' valorvectexto '}' {$$ = newvec($1, $2, $4, $8, NULL);}
+    | TIPO_TEXTO VAR '[' arit ']' {$$ = newvec($1, $2, $4, NULL, NULL);}
     ;
 valorvectexto: TEXTO ',' valorvectexto {$$ = newast('l', newtexto($1), $3);}
     | TEXTO {$$ = newast('l', newtexto($1), NULL);}
@@ -1601,10 +1612,10 @@ valorvectexto: TEXTO ',' valorvectexto {$$ = newast('l', newtexto($1), $3);}
 valorvec: logica ',' valorvec {$$ = newast('l', $1, $3);}
     | logica {$$ = newast('l', $1, NULL);}
     ;
-declvecmult: TIPO VAR '[' INTEIRO ']' '=' '{' valorvec '}' {$$ = newvec($1, $2, $4, $8, NULL);}
-    | TIPO VAR '[' INTEIRO ']' {$$ = newvec($1, $2, $4, NULL, NULL);}
-    | declvecmult ',' VAR '[' INTEIRO ']' {$$ = newvec($1->nodetype, $3, $5, NULL, $1);}
-    | declvecmult ',' VAR '[' INTEIRO ']' '=' '{' valorvec '}' {$$ = newvec($1->nodetype, $3, $5, $9, $1);}
+declvecmult: TIPO VAR '[' arit ']' '=' '{' valorvec '}' {$$ = newvec($1, $2, $4, $8, NULL);}
+    | TIPO VAR '[' arit ']' {$$ = newvec($1, $2, $4, NULL, NULL);}
+    | declvecmult ',' VAR '[' arit ']' {$$ = newvec(((Symasgn*)$1)->type, $3, $5, NULL, $1);}
+    | declvecmult ',' VAR '[' arit ']' '=' '{' valorvec '}' {$$ = newvec(((Symasgn*)$1)->type, $3, $5, $9, $1);}
     ;
 outfunc: VAR '(' arg ')' {$$ = newast('a', newtexto($1), $3);}
     | VAR '(' ')' {$$ = newast('a', newtexto($1), NULL);}
@@ -1624,8 +1635,8 @@ saida: logica {$$ = newast('P', $1, NULL);}
     | incdec {$$ = newast('P', $1, NULL);}
     | incdec ',' saida { $$ = newast('P', $1, $3);}
     ;
-incdec: VAR PLUS %prec PLUS2 {$$ = newasgn($1, 0, newast('+',newValorVal($1, 0),newint(1)));}
-    | VAR LESS %prec LESS2 {$$ = newasgn($1, 0, newast('-',newValorVal($1, 0),newint(1)));}
+incdec: VAR PLUS %prec PLUS2 {$$ = newasgn($1, newint(0), newast('+', newValorVal($1, newint(0)), newint(1)));}
+    | VAR LESS %prec LESS2 {$$ = newasgn($1, newint(0), newast('-', newValorVal($1, newint(0)), newint(1)));}
     //| PLUS VAR %prec PLUS1 {$$ = newast('l', newValorVal($2), newasgn($2, 0, newast('+', newValorVal($2), newint(1))));}
     //| LESS VAR %prec LESS1 {$$ = newast('l', newValorVal($2), newasgn($2, 0, newast('-', newValorVal($2), newint(1))));}
     ;
@@ -1660,10 +1671,10 @@ arit: SIN '(' arit ')' {$$ = newast('S',$3,NULL);}
 valor: INTEIRO {$$ = newint($1);}    // codigo 'k'
     | REAL {$$ = newreal($1);}      // codigo 'K'
     | VAR varvar {
-        if($2==NULL) $$ = newValorVal($1, 0);
+        if($2==NULL) $$ = newValorVal($1, newint(0));
         else $$ = newast('a', newtexto($1), $2->r);
     }
-    | VAR '[' INTEIRO ']' {$$ = newValorVal($1, $3);}
+    | VAR '[' arit ']' {$$ = newValorVal($1, $3);}
     ;
 varvar: {$$ = NULL;}
     | '(' varfun ')' {
