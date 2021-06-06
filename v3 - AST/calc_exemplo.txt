@@ -124,6 +124,7 @@ in
         >> "Qual o sistema de amortizacao?"
         >> "(1) Tabela Prime"
         >> "(2) Tabela SAC"
+        >> "(3) Sair"
         op <<
     }
 ni
