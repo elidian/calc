@@ -6,7 +6,7 @@ in
         inout c*(1+i)^t
     }
 
-    real prestacao_prime(real c, real i, real t){
+    real prestacao_price(real c, real i, real t){
         i = i/100
         #>> "P ", (c*((1+i)^t)*i)/((1+i)^t-1)
         inout c*(1+i)^t*i/((1+i)^t-1)
@@ -46,7 +46,7 @@ in
     >>;
     >> "-> EMPRESTIMO <-"
     >> "Qual o sistema de amortizacao?"
-    >> "(1) Tabela Prime"
+    >> "(1) Tabela Price"
     >> "(2) Tabela SAC"
     >> "(3) Sair"
     op <<
@@ -65,14 +65,14 @@ in
         total[2] = 0
         total[3] = capital
         inif op == 1 {
-            prestacao1 = prestacao_prime(capital, taxa, periodo)
+            prestacao1 = prestacao_price(capital, taxa, periodo)
             t = 0
             d[0] = capital
             
             >>;
-            >> "A prestacao no modelo PRIME eh ", prestacao1
+            >> "A prestacao no modelo PRICE eh ", prestacao1
             >>;
-            >> "TABELA PRIME"
+            >> "TABELA PRICE"
             >> "----------------------------------------------------------------------"
             >> "Mes   | Prestacao    | Juros    | Amortizacao    | Saldo Devedor " 
             >> "----------------------------------------------------------------------"
@@ -98,7 +98,7 @@ in
                 >>;
                 >> "A prestacao no modelo SAC comeca em ", prestacao2
                 >>;
-                >> "TABELA PRIME"
+                >> "TABELA PRICE"
                 >> "----------------------------------------------------------------------"
                 >> "Mes   | Prestacao    | Juros    | Amortizacao | Saldo Devedor " 
                 >> "----------------------------------------------------------------------"
@@ -122,7 +122,7 @@ in
         >>;
         >> "-> EMPRESTIMO <-"
         >> "Qual o sistema de amortizacao?"
-        >> "(1) Tabela Prime"
+        >> "(1) Tabela Price"
         >> "(2) Tabela SAC"
         >> "(3) Sair"
         op <<
