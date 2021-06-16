@@ -1,7 +1,7 @@
 # Elidian Alencar -- Compiladores -- Flex-Bison -- Codigo Calc
 Esta linguagem está sendo desenvolvida na disciplina de compiladores.
 
-### Marcadores de início e fim do programa
+### MARCADORES DE INÍCIO E FIM DO PROGRAMA
 O comando "in" inicia o programa, já o comando "ni" o finaliza
 ```
 in
@@ -9,7 +9,7 @@ in
 ni
 ```
 
-### Comentários
+### COMENTÁRIO
 Para comentar uma linha, adicione # no inicio do comentário
 ```
 in
@@ -29,7 +29,7 @@ in
 ni
 ```
 
-### Tipos e Declarações de variaveis
+### TIPOS E DECLARAÇÕES DE VARIAVEIS
 As declarações devem ser precedidas de tipo e seguidas pelo nome da variável, podendo ser atribuido valor durante a declaração.
 
 real: aceita número real
@@ -56,7 +56,7 @@ obs:
 1. O nome das variaveis devem iniciar sempre com uma letra e depois podem conter letra, numero e/ou underline (_).
 2. A declaração de um mesmo tipo pode ser em linha separados por vírgula (,).
 
-### Declarações de vetores
+### DECLARAÇÕES DE VETORES
 semelhante as declarações anteriores
 ```
 real vec[3]
@@ -70,7 +70,7 @@ texto name2[3] = {"", "nome"}
 texto my_name[2] = {name2[1], "sobrenome"}
 ```
 
-### Atribuição de valores
+### ATRIBUIÇÃO DE VALORES
 Para atribuição utiliza-se o comando = após a variável
 ```
 int a, soma
@@ -86,14 +86,14 @@ nome[1] = "sobrenome"
 primeiro = nome[0]
 ```
 
-### Operação de escrita
+### OPERAÇÃO DE ESCRITA NA TELA
 Para escrita em tela utiliza-se o comando >>
 ```
 inteiro a = 1
 real b = 5.5
 texto name[1] = "primeiro segundo"
 
->> "Hello Word!"
+>> "Hello World!"
 >> a
 >> 5.0
 >> a + b
@@ -101,7 +101,7 @@ texto name[1] = "primeiro segundo"
 ```
 Saída
 ```
-Hello Word!
+Hello World!
 1
 5.00
 6.50000
@@ -110,14 +110,33 @@ primeiro segundo
 
 A escrita pode ser em uma mesma linha separados por vírgula (,)
 ```
->> "Hello Word!", ' ', a, ' ', 5.0 , ' ', a + b, ' ', name[1]
+>> "Hello World!", ' ', a, ' ', 5.0 , ' ', a + b, ' ', name[1]
 ```
 Saída
 ```
-Hello Word! 1 5.00 6.50000 primeiro segundo
+Hello World! 1 5.00 6.50000 primeiro segundo
 ```
 
-### Operação de leitura
+Obs.: Por padrão, ao final do escrever há um salto de linha.
+
+Há duas formas para pular linha:
+1. escrevendo um texto com apenas "\n". 
+2. escrevendo >>;
+Exemplo:
+```
+>> "Hello", "\n", "World!"
+>>;
+>> "fim"
+```
+Saída:
+```
+Hello
+World!
+
+fim
+```
+
+### OPERAÇÃO DE LEITURA
 Para receber informação da tela utiliza-se o comando <<
 ```
 real idade
@@ -126,7 +145,7 @@ real idade
 idade <<
 ```
 
-### Operações matemáticas
+### OPERAÇÕES MATEMÁTICAS
 ```
 real a = 5.0
 inteiro b = 10
@@ -156,7 +175,7 @@ Cosseno: 0,99619
 Modulo: -15.00000
 ```
 
-### Operações lógicos
+### OPERAÇÕES LÓGICAS
 ```
 inteiro a = 10, b = 5, c = 15
 
@@ -181,8 +200,8 @@ OU: 1
 E: 1
 ```
 
-### Expressões matemáticas, logicos e precedência
-#### Ordem de precedência
+### ORDEM DE PRECEDÊNCIAS
+
 1. Parênteses
 2. Exponenciação
 3. Multiplicação e divisão tem mesmo grau de precedência
@@ -215,16 +234,16 @@ Saída:
 0
 ```
 
-### Extruturas de decisão IF e IF ELSE
-#### If
-Estrutura básica:
+### EXTRUTURAS DE DECISÃO IF, IF ELSE E OPERADOR TERNÁRIO
+#### IF
+Estrutura:
 ```
 inif codigo_logico
 {
   # lista de codigos caso IF POSITIVO
 }
 ```
-Exemplo simples:
+Exemplo:
 ```
 real a = 3
 inteiro b = 7
@@ -236,7 +255,8 @@ Saída:
 ```
 
 ```
-#### If Else
+
+#### IF ELSE
 Estrutura:
 ```
 inif codigo_logico
@@ -248,7 +268,7 @@ infi
   # lista de codigos caso IF NEGATIVO
 }
 ```
-Exemplo simples:
+Exemplo:
 ```
 inteiro a = 3
 real b = 7
@@ -266,7 +286,7 @@ Saída:
 NAO
 ```
 
-#### Operador Ternário
+#### OPERADOR TERNÁRIO
 estrutura:
 ```
 codigo_logico ? codigo_caso_positivo : codigo_caso_negativo
@@ -281,8 +301,8 @@ Saída:
 codigo caso negativo
 ```
 
-### Estruturas de repetição WHILE e FOR
-#### While
+### ESTRUTURAS DE REPETIÇÃO WHILE E FOR
+#### WHILE
 estrutura:
 ```
 inwhile codigo_logico
@@ -335,17 +355,17 @@ Saída:
 ### FUNÇÔES
 Modelo:
 ```
-tipo nome (){
+tipo nome_da_funcao (){
   # codigo
   inout codigo_logico_aritmetico_valor
 }
 
-tipo nome (tipo parametro){
+tipo nome_da_funcao (tipo parametro){
   # codigo
   inout codigo_logico_aritmetico_valor
 }
 
-tipo nome (tipo parametro1, tipo parametro2){
+tipo nome_da_funcao (tipo parametro_1, tipo parametro_2){
   # codigo
   inout codigo_logico_aritmetico_valor
 }
@@ -356,8 +376,8 @@ Tipos de funções:
 3. void
 
 Obs.: Não é obrigatório o uso da palavra chave de retorno "inout":
-1. a expressão "inout" é ignorada na função do tipo void e retornando 0 (zero) ao final;
-2. caso seja usado "inout" a função será interrompida e retornará o valor após ela;
+1. a expressão "inout" é ignorada na função do tipo void, retornando 0 (zero) ao final;
+2. caso seja usado "inout" a função não void será interrompida e retornará o valor após ela;
 3. caso não seja usado "inout" a função continuará até seu término e ao final retornará 0 (zero).
 
 Exemplo:
@@ -386,7 +406,7 @@ Saída:
 30.000000
 ```
 
-### Exemplo
+### EXEMPLO 1
 ```
 in
 
@@ -405,5 +425,139 @@ in
   area = h * b
   >> "A area do retangulo eh: ", area
 
+ni
+```
+
+### EXEMPLO 2
+```
+in
+
+    real juroscomposto(real c, real i, real t){
+        i =  i/100
+        #>> "M ", c*((1+(i))^t)
+        inout c*(1+i)^t
+    }
+
+    real prestacao_price(real c, real i, real t){
+        i = i/100
+        #>> "P ", (c*((1+i)^t)*i)/((1+i)^t-1)
+        inout c*(1+i)^t*i/((1+i)^t-1)
+    }
+
+    real capital, montante, juros, taxa
+    inteiro periodo, op
+    texto nome
+
+    >> "SIMULADOR DE EMPRESTIMOS"
+    >> "Qual seu nome?"
+    nome <<
+    >> "Qual o valor de Capital desejado?"
+    capital <<
+    >> "Qual a duracao do pagamento em meses?"
+    periodo <<
+    >> "Qual a taxa de juros ao mes?"
+    taxa <<
+    >>;
+
+    montante = juroscomposto(capital, taxa, periodo)
+
+    >> "Vejamos, Sr(a) ", nome, ","
+    >> "-> INVESTIMENTO <-"
+    >> "O Capital aplicado renderia um Montante de ", montante, " reais se no regime do juros composto."
+    >> "Sendo o Montante igual a soma do Capital e do Juros composto total."
+    >> "\n", "----------------------"
+    >> "Resumo"
+    >> "----------------------"
+    >> "Capital  = ", capital
+    juros = montante - capital
+    >> "Juros    = ", juros
+    >> "----------------------"
+    >> "Montante = ", montante
+    >> "----------------------"
+
+    >>;
+    >> "-> EMPRESTIMO <-"
+    >> "Qual o sistema de amortizacao?"
+    >> "(1) Tabela PRICE"
+    >> "(2) Tabela SAC"
+    >> "(3) Sair"
+    op <<
+
+    
+    inteiro t
+    real prestacao1
+    real j[periodo + 1], a1[periodo + 1], d[periodo + 1]
+    real prestacao2[periodo + 1]
+    real a2
+    real total[4]
+
+    inwhile(op==1 || op ==2){
+        total[0] = 0
+        total[1] = 0
+        total[2] = 0
+        total[3] = capital
+        inif op == 1 {
+            prestacao1 = prestacao_price(capital, taxa, periodo)
+            t = 0
+            d[0] = capital
+            
+            >>;
+            >> "A prestacao no modelo PRICE eh ", prestacao1
+            >>;
+            >> "TABELA PRICE"
+            >> "----------------------------------------------------------------------"
+            >> "Mes   | Prestacao    | Juros    | Amortizacao    | Saldo Devedor " 
+            >> "----------------------------------------------------------------------"
+            >> "0     |              |          |                | ", d[0] 
+            inwhile t < periodo {
+                t++
+                j[t] = d[t - 1]*taxa/100
+                a1[t] = prestacao1 - j[t]
+                d[t] = d[t - 1] - a1[t]
+                total[0] = total[0] + prestacao1
+                total[1] = total[1] + j[t]
+                total[2] = total[2] + a1[t]
+                total[3] = d[t]
+                >> t, "     | ", prestacao1 ,"       | ", j[t] ,"   | ", a1[t] ,"       | ", d[t] 
+            }
+        } infi {
+            inif op == 2 {
+                a2 = capital/periodo
+                t = 0
+                d[0] = capital
+                prestacao2 = a2 + d[0]*taxa/100
+                
+                >>;
+                >> "A prestacao no modelo SAC comeca em ", prestacao2
+                >>;
+                >> "TABELA PRICE"
+                >> "----------------------------------------------------------------------"
+                >> "Mes   | Prestacao    | Juros    | Amortizacao | Saldo Devedor " 
+                >> "----------------------------------------------------------------------"
+                >> "0     |              |          |             | ", d[0] 
+                inwhile t < periodo {
+                    t++
+                    j[t] = d[t - 1]*taxa/100
+                    prestacao2[t] = a2 + j[t]
+                    d[t] = d[t - 1] - a2
+                    total[0] = total[0] + prestacao2[t]
+                    total[1] = total[1] + j[t]
+                    total[2] = total[2] + a2
+                    total[3] = d[t]
+                    >> t, "     | ", prestacao2[t] ,"       | ", j[t] ,"   | ", a2 ,"       | ", d[t] 
+                }
+            }
+        }
+        >> "----------------------------------------------------------------------"
+        >> "Total     | ", total[0] ,"       | ", total[1] ,"   | ", total[2] ,"       | ", total[3] 
+        
+        >>;
+        >> "-> EMPRESTIMO <-"
+        >> "Qual o sistema de amortizacao?"
+        >> "(1) Tabela PRICE"
+        >> "(2) Tabela SAC"
+        >> "(3) Sair"
+        op <<
+    }
 ni
 ```
