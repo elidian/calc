@@ -1,0 +1,18 @@
+in
+void soma (){
+  >> 10 + 15
+}
+
+inteiro dobro (real n){
+  inout 2 * n
+}
+
+real produto (inteiro a, real b){
+  real res = a * b
+  inout res
+}
+
+soma()
+>> dobro(3)
+>> produto(dobro(3), 5)
+ni
