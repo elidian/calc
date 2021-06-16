@@ -1860,8 +1860,8 @@ operadorternario: '(' logica ')' '?' exp ':' exp %prec POT {$$ = newflow('?', $2
 args: TIPO VAR {$$ = newast('l', newvar($1, $2, NULL, NULL), NULL);}
     | TIPO VAR ',' args {$$ = newast('l', newvar($1, $2, NULL, NULL), $4);}
     ;
-arg: valor {$$ = newast('l', $1, NULL);}
-    | valor ',' arg {$$ = newast('l', $1, $3);}
+arg: logica {$$ = newast('l', $1, NULL);}
+    | logica ',' arg {$$ = newast('l', $1, $3);}
     ;
 saida: logica {$$ = newast('P', $1, NULL);}
     | logica ',' saida { $$ = newast('P', $1, $3);}
@@ -1925,7 +1925,7 @@ varfun: {$$ = NULL;}
 #include "lex.yy.c"
 
 int main(){
-    yyin=fopen("calc_exemplo.txt", "r");
+    yyin=fopen("exemplo.txt", "r");
     yyparse();    
     fclose(yyin);
 

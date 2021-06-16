@@ -1,18 +1,15 @@
 in
-void soma (){
-  >> 10 + 15
-}
 
-inteiro dobro (real n){
-  inout 2 * n
-}
+  real fatorial (real n)
+  {
+    real vfat
+    inif n <= 1 {
+      inout 1
+    } infi {
+      vfat = n * fatorial(n-1)
+      inout vfat
+    }
+  }
 
-real produto (inteiro a, real b){
-  real res = a * b
-  inout res
-}
-
-soma()
->> dobro(3)
->> produto(dobro(3), 5)
+  >> fatorial(5)
 ni
