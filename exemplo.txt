@@ -1,0 +1,16 @@
+# CODIGO EXEMPLO
+
+in
+
+    inteiro a, b = 10, c
+    real d, e = 10.5, f
+    texto author[2] = {"Elidian", "Alencar"}
+
+    texto sum[1] = {e+b}
+    >> sum[0]
+
+
+    
+    >> author , ' ', author[1]
+
+ni
