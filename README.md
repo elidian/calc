@@ -120,8 +120,10 @@ Hello World! 1 5.00 6.50000 primeiro segundo
 Obs.: Por padrão, ao final do escrever há um salto de linha.
 
 Há duas formas para pular linha:
-1. escrevendo um texto com apenas **_"\n"_**. 
-2. escrevendo **_>>;_**
+
+1. escrevendo um texto com apenas **_"\n"_**;
+2. escrevendo **_>>;_**.
+
 Exemplo:
 ```
 >> "Hello", "\n", "World!"
@@ -371,11 +373,13 @@ tipo nome_da_funcao (tipo parametro_1, tipo parametro_2){
 }
 ```
 Tipos de funções:
+
 1. inteiro
 2. real
 3. void
 
-Obs.: Não é obrigatório o uso da palavra chave de retorno **_inout_**:
+Obs.: Não é obrigatório o uso da palavra chave de retorno **_inout_**. Assim, têm-se alguns casos:
+
 1. a expressão **_inout_** é ignorada na função do tipo void, retornando 0 (zero) ao final;
 2. caso seja usado **_inout_** a função não void será interrompida e retornará o valor após ela;
 3. caso não seja usado **_inout_** a função continuará até seu término e ao final retornará 0 (zero).
