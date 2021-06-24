@@ -1,8 +1,8 @@
 # Elidian Alencar -- Compiladores -- Flex-Bison -- Codigo Calc
-Esta linguagem está sendo desenvolvida na disciplina de compiladores.
+A linguagem **INCONI** foi desenvolvida na disciplina de compiladores.
 
 ### MARCADORES DE INÍCIO E FIM DO PROGRAMA
-O comando "in" inicia o programa, já o comando "ni" o finaliza
+O comando **_in_** inicia o programa, já o comando **_ni_** o finaliza
 ```
 in
     
@@ -10,7 +10,7 @@ ni
 ```
 
 ### COMENTÁRIO
-Para comentar uma linha, adicione # no inicio do comentário
+Para comentar uma linha, adicione **_#_** no inicio do comentário
 ```
 in
     # código 
@@ -18,7 +18,7 @@ in
     # código
 ni
 ```
-Para comentar várias linhas adicione /* no início e */ no final do comentário.
+Para comentar várias linhas adicione **_/*_** no início e **_*/_** no final do comentário.
 ```
 in
     /*
@@ -57,7 +57,7 @@ obs:
 2. A declaração de um mesmo tipo pode ser em linha separados por vírgula (,).
 
 ### DECLARAÇÕES DE VETORES
-semelhante as declarações anteriores
+Semelhante as declarações anteriores
 ```
 real vec[3]
 real vec2[5] = {2, 3, 5, 7, 11}
@@ -71,7 +71,7 @@ texto my_name[2] = {name2[1], "sobrenome"}
 ```
 
 ### ATRIBUIÇÃO DE VALORES
-Para atribuição utiliza-se o comando = após a variável
+Para atribuição utiliza-se o comando **_=_** após a variável
 ```
 int a, soma
 real b, c[2]
@@ -87,7 +87,7 @@ primeiro = nome[0]
 ```
 
 ### OPERAÇÃO DE ESCRITA NA TELA
-Para escrita em tela utiliza-se o comando >>
+Para escrita em tela utiliza-se o comando **_>>_**
 ```
 inteiro a = 1
 real b = 5.5
@@ -120,8 +120,8 @@ Hello World! 1 5.00 6.50000 primeiro segundo
 Obs.: Por padrão, ao final do escrever há um salto de linha.
 
 Há duas formas para pular linha:
-1. escrevendo um texto com apenas "\n". 
-2. escrevendo >>;
+1. escrevendo um texto com apenas **_"\n"_**. 
+2. escrevendo **_>>;_**
 Exemplo:
 ```
 >> "Hello", "\n", "World!"
@@ -137,7 +137,7 @@ fim
 ```
 
 ### OPERAÇÃO DE LEITURA
-Para receber informação da tela utiliza-se o comando <<
+Para receber informação da tela utiliza-se o comando **_<<_**
 ```
 real idade
 >> "Digite sua idade: "
@@ -234,7 +234,7 @@ Saída:
 0
 ```
 
-### EXTRUTURAS DE DECISÃO IF, IF ELSE E OPERADOR TERNÁRIO
+### EXTRUTURAS DE DECISÃO **_IF_**, **_IF ELSE_** E **_OPERADOR TERNÁRIO_**
 #### IF
 Estrutura:
 ```
@@ -287,7 +287,7 @@ NAO
 ```
 
 #### OPERADOR TERNÁRIO
-estrutura:
+Estrutura:
 ```
 codigo_logico ? codigo_caso_positivo : codigo_caso_negativo
 
@@ -301,16 +301,16 @@ Saída:
 codigo caso negativo
 ```
 
-### ESTRUTURAS DE REPETIÇÃO WHILE E FOR
+### ESTRUTURAS DE REPETIÇÃO **_WHILE_** E **_FOR_**
 #### WHILE
-estrutura:
+Estrutura:
 ```
 inwhile codigo_logico
 {
   # lista de codigos caso teste WHILE POSITIVO
 }
 ```
-Exemplo simples
+Exemplo:
 ```
 inteiro x = 0
 inwhile x<=10-x
@@ -353,7 +353,7 @@ Saída:
 ```
 
 ### FUNÇÔES
-Modelo:
+Estrutura:
 ```
 tipo nome_da_funcao (){
   # codigo
@@ -375,10 +375,10 @@ Tipos de funções:
 2. real
 3. void
 
-Obs.: Não é obrigatório o uso da palavra chave de retorno "inout":
-1. a expressão "inout" é ignorada na função do tipo void, retornando 0 (zero) ao final;
-2. caso seja usado "inout" a função não void será interrompida e retornará o valor após ela;
-3. caso não seja usado "inout" a função continuará até seu término e ao final retornará 0 (zero).
+Obs.: Não é obrigatório o uso da palavra chave de retorno **_inout_**:
+1. a expressão **_inout_** é ignorada na função do tipo void, retornando 0 (zero) ao final;
+2. caso seja usado **_inout_** a função não void será interrompida e retornará o valor após ela;
+3. caso não seja usado **_inout_** a função continuará até seu término e ao final retornará 0 (zero).
 
 Exemplo:
 ```
@@ -421,7 +421,7 @@ in
   >> "Digite a altura: "
   h <<
 
-  >> ""
+  >>;
   area = h * b
   >> "A area do retangulo eh: ", area
 
